@@ -1,0 +1,2380 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KCYM Pakkil Unit – Member Registration Portal</title>
+  
+  <!-- Premium Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Inter:wght@300;400;500;600;700&family=Manjari:wght@400;700&display=swap" rel="stylesheet" />
+  
+  <!-- html2pdf.js for high-fidelity bilingual PDF rendering (includes html2canvas and jsPDF) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+  
+  <!-- Canvas Confetti for celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* Reset & CSS Variables */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #C8102E;      /* Deep Crimson */
+      --primary-hover: #A30D24;
+      --secondary: #F5C300;    /* Warm Gold */
+      --secondary-rgb: 245, 195, 0;
+      --bg: #F9FAFB;
+      --card-bg: #FFFFFF;
+      --text: #111827;
+      --text-muted: #6B7280;
+      --border: #E5E7EB;
+      --input-bg: #FFFFFF;
+      --input-focus: rgba(200, 16, 46, 0.1);
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      --success: #10B981;
+      --error: #EF4444;
+      --warning: #F59E0B;
+    }
+
+    [data-theme="dark"] {
+      --primary: #EF4444;      /* Slightly brighter red for dark mode */
+      --primary-hover: #F87171;
+      --secondary: #FBBF24;
+      --secondary-rgb: 251, 191, 36;
+      --bg: #0B0F19;
+      --card-bg: #151D30;
+      --text: #F9FAFB;
+      --text-muted: #9CA3AF;
+      --border: #242E42;
+      --input-bg: #1E293B;
+      --input-focus: rgba(239, 68, 68, 0.15);
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    }
+
+    body {
+      font-family: 'Inter', 'Manjari', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      transition: var(--transition);
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* Header & Branding */
+    .header-band {
+      background: linear-gradient(135deg, #9a0b22 0%, #C8102E 50%, #730718 100%);
+      padding: 30px 20px 15px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    
+    .header-band::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.02) 20px, rgba(255,255,255,0.02) 40px);
+      pointer-events: none;
+    }
+
+    .theme-toggle-wrap {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
+    }
+
+    .theme-toggle-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .theme-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+
+    .theme-toggle-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    [data-theme="light"] .sun-icon,
+    [data-theme="dark"] .moon-icon {
+      display: none;
+    }
+
+    .gold-stripe {
+      height: 6px;
+      background: var(--secondary);
+      box-shadow: 0 2px 8px rgba(var(--secondary-rgb), 0.4);
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .logo-wrap {
+      display: inline-block;
+      background: #fff;
+      border-radius: 50%;
+      padding: 6px;
+      box-shadow: 0 0 0 4px rgba(var(--secondary-rgb), 0.8), 0 10px 30px rgba(0,0,0,0.3);
+      margin-bottom: 16px;
+      transition: var(--transition);
+    }
+
+    .logo-wrap:hover {
+      transform: scale(1.03) rotate(3deg);
+    }
+
+    .logo-wrap img {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .org-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 6px;
+    }
+
+    .site-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .site-title span {
+      color: var(--secondary);
+    }
+
+    .site-subtitle {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.85);
+      margin-top: 6px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .diocese-tag {
+      display: inline-block;
+      margin-top: 12px;
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 4px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    /* Welcome Banner */
+    .welcome {
+      background: var(--secondary);
+      padding: 16px 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .welcome p {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #5a3e00;
+      line-height: 1.6;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* Main Container */
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 30px 20px 60px;
+    }
+
+    .section-header {
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .section-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .section-sub {
+      font-size: 13.5px;
+      color: var(--text-muted);
+    }
+
+    /* Glassmorphic Form Card */
+    .form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px 30px;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+      position: relative;
+    }
+
+    /* Shake Animation for Validation Errors */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    .card-shake {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    /* Section Labels inside Form */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-label::after {
+      content: '';
+      height: 1px;
+      flex-grow: 1;
+      background: var(--border);
+    }
+
+    /* Form Layout Elements */
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+      .form-card {
+        padding: 24px 16px;
+      }
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 6px;
+      transition: var(--transition);
+    }
+
+    label .req {
+      color: var(--primary);
+      margin-left: 2px;
+    }
+
+    label .opt {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 10px;
+      text-transform: none;
+      letter-spacing: 0;
+      margin-left: 4px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 11px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14.5px;
+      color: var(--text);
+      background-color: var(--input-bg);
+      outline: none;
+      transition: var(--transition);
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--input-focus);
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 38px;
+    }
+
+    [data-theme="dark"] select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ccc' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    input.valid, select.valid, textarea.valid {
+      border-color: var(--success);
+    }
+    
+    input.invalid, select.invalid, textarea.invalid {
+      border-color: var(--error);
+    }
+
+    .error-msg {
+      font-size: 11.5px;
+      color: var(--error);
+      margin-top: 4px;
+      display: none;
+      font-weight: 500;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .warning-msg {
+      font-size: 11.5px;
+      color: var(--warning);
+      margin-top: 4px;
+      display: none;
+      font-weight: 500;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Photo Upload Area */
+    .photo-upload-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .photo-upload-area {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-md);
+      width: 100%;
+      height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      background: rgba(0,0,0,0.01);
+    }
+
+    .photo-upload-area:hover {
+      border-color: var(--primary);
+      background: var(--input-focus);
+    }
+
+    .photo-upload-area img {
+      width: 90px;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 6px;
+      display: none;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .photo-upload-area p {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-weight: 500;
+      text-align: center;
+      padding: 0 10px;
+    }
+
+    .photo-upload-area input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Submit Button & States */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      margin-top: 10px;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(200, 16, 46, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(200, 16, 46, 0.3);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.75;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .status-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    /* Draft Toast */
+    .toast {
+      display: none;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 20px;
+      align-items: center;
+      justify-content: space-between;
+      animation: slideDown 0.3s ease-out;
+      font-size: 13px;
+    }
+
+    .toast-text {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .toast-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .toast-btn {
+      background: none;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .toast-btn-restore { color: var(--primary); }
+    .toast-btn-clear { color: var(--text-muted); }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Success Card */
+    .success-card {
+      display: none;
+      text-align: center;
+      padding: 48px 30px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .success-icon {
+      width: 70px;
+      height: 70px;
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 32px;
+      border: 1.5px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .success-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .success-card p {
+      font-size: 14.5px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 500px;
+      margin: 0 auto 20px;
+    }
+
+    .btn-wrap {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-pdf {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: #fff;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      transition: var(--transition);
+      box-shadow: 0 4px 10px rgba(200, 16, 46, 0.15);
+    }
+
+    .btn-pdf:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(200, 16, 46, 0.25);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 26px;
+      background: var(--card-bg);
+      color: var(--text);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      font-family: 'Inter', sans-serif;
+      transition: var(--transition);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+
+    /* Admin Dashboard Panel */
+    .admin-dashboard {
+      display: none;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .dashboard-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 15px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-val {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 2px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    /* Filters & Controls */
+    .controls-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .search-input-wrap {
+      flex-grow: 1;
+      position: relative;
+      min-width: 200px;
+    }
+
+    .filter-select {
+      width: auto;
+      min-width: 140px;
+    }
+
+    /* Table styles */
+    .table-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    table.dashboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+    }
+
+    table.dashboard-table th {
+      background: rgba(0,0,0,0.02);
+      padding: 12px 16px;
+      font-weight: 600;
+      border-bottom: 1.5px solid var(--border);
+      color: var(--text);
+    }
+
+    [data-theme="dark"] table.dashboard-table th {
+      background: rgba(255,255,255,0.02);
+    }
+
+    table.dashboard-table td {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+      color: var(--text);
+    }
+
+    .table-thumbnail {
+      width: 32px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .table-avatar-placeholder {
+      width: 32px;
+      height: 40px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .actions-cell {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-action-view {
+      padding: 6px 12px;
+      background: rgba(var(--secondary-rgb), 0.15);
+      color: var(--text);
+      border: 1px solid rgba(var(--secondary-rgb), 0.3);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-action-view:hover {
+      background: var(--secondary);
+      color: #000;
+    }
+
+    .btn-action-delete {
+      padding: 6px 12px;
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-action-delete:hover {
+      background: var(--error);
+      color: #fff;
+    }
+
+    /* Modals */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .modal-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      animation: scaleUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes scaleUp {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--primary);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 20px;
+    }
+
+    .modal-close:hover {
+      color: var(--text);
+    }
+
+    .modal-body {
+      margin-bottom: 20px;
+    }
+
+    .modal-grid-details {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 8px 12px;
+      font-size: 13.5px;
+      margin-top: 15px;
+    }
+
+    .modal-grid-label {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .modal-grid-val {
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    /* Footer styling */
+    footer {
+      text-align: center;
+      padding: 28px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      background: rgba(0, 0, 0, 0.01);
+      transition: var(--transition);
+    }
+
+    [data-theme="dark"] footer {
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    footer strong {
+      color: var(--primary);
+    }
+
+    .footer-links {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      font-weight: 600;
+    }
+
+    .footer-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .footer-link:hover {
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header Banner -->
+<header class="header-band">
+  <div class="theme-toggle-wrap">
+    <button id="themeToggleBtn" onclick="toggleTheme()" class="theme-toggle-btn" aria-label="Toggle Dark Mode">
+      <!-- Sun Icon -->
+      <svg class="sun-icon" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.01a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>
+      <!-- Moon Icon -->
+      <svg class="moon-icon" viewBox="0 0 24 24"><path d="M9.37 5.51A7.35 7.35 0 009.1 7.5c0 4.08 3.32 7.4 7.4 7.4.73 0 1.43-.11 2.1-.3 1.04-.3 1.97.7 1.54 1.68-.88 2.03-2.9 3.48-5.3 3.48-3.17 0-5.75-2.58-5.75-5.75 0-2.4 1.45-4.42 3.48-5.3.98-.43 1.98.5 1.68 1.54z"/></svg>
+    </button>
+  </div>
+  
+  <div class="header-content">
+    <div class="logo-wrap">
+      <img src="kcym-logo.jpg" alt="KCYM Logo" onerror="handleLogoError(this)" />
+    </div>
+    <p class="org-label">Kerala Catholic Youth Movement</p>
+    <h1 class="site-title">KCYM <span>Pakkil</span> Unit</h1>
+    <p class="site-subtitle">Member Registration Portal</p>
+    <span class="diocese-tag">St. Theresa's Church Pakkil · Diocese of Vijayapuram</span>
+  </div>
+  <div class="gold-stripe"></div>
+</header>
+
+<!-- Welcome Info Banner -->
+<div class="welcome" id="welcomeBanner">
+  <p>✝️ Welcome to the KCYM Pakkil Unit registration portal. All youth members of St. Theresa's Church Pakkil are warmly invited to register and be part of our vibrant community. Together, let us grow in faith, service, and fellowship.</p>
+</div>
+
+<!-- Main Section -->
+<main>
+
+  <!-- Draft Restore Toast -->
+  <div class="toast" id="draftToast">
+    <span class="toast-text">📝 Unfinished registration draft found.</span>
+    <div class="toast-actions">
+      <button class="toast-btn toast-btn-restore" onclick="restoreDraft()">Restore</button>
+      <button class="toast-btn toast-btn-clear" onclick="clearDraftToast()">Dismiss</button>
+    </div>
+  </div>
+
+  <!-- Registration Form Section -->
+  <div id="registrationSection">
+    <div class="section-header">
+      <h2 class="section-heading">Register as a Member</h2>
+      <p class="section-sub">Fill in the form below. Fields marked <span style="color:var(--primary)">*</span> are required.</p>
+    </div>
+
+    <div class="form-card" id="formCard">
+      <div class="section-label">Unit Information</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="unit">Unit <span class="req">*</span></label>
+          <input type="text" id="unit" placeholder="e.g. Pakkil Unit" oninput="validateField(this, v => v.trim().length > 1)" />
+          <div class="error-msg" id="err-unit">Please enter unit name.</div>
+        </div>
+        <div class="form-group">
+          <label for="mekala">Mekala (മേഖല) <span class="req">*</span></label>
+          <input type="text" id="mekala" placeholder="e.g. Vijayapuram" oninput="validateField(this, v => v.trim().length > 1)" />
+          <div class="error-msg" id="err-mekala">Please enter mekala.</div>
+        </div>
+      </div>
+
+      <div class="section-label">Personal Information</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fullName">Full Name <span class="req">*</span></label>
+          <input type="text" id="fullName" placeholder="Enter your full name" oninput="validateField(this, v => v.trim().length > 1)" />
+          <div class="error-msg" id="err-fullName">Please enter your full name.</div>
+        </div>
+        
+        <div class="form-group">
+          <label>Photo <span class="req">*</span> <span class="opt">(Passport size)</span></label>
+          <div class="photo-upload-container">
+            <div class="photo-upload-area" id="photoArea">
+              <img id="photoPreview" src="" alt="Preview" />
+              <p id="photoText">📷 Tap to upload passport photo</p>
+              <input type="file" id="photoInput" accept="image/*" onchange="handlePhotoUpload(this)" />
+            </div>
+            <div class="error-msg" id="err-photo">Please upload a profile photo.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="address">Address <span class="req">*</span></label>
+        <textarea id="address" placeholder="House name, Street, Ward, Post Office" rows="3" oninput="validateField(this, v => v.trim().length > 3)"></textarea>
+        <div class="error-msg" id="err-address">Please enter your complete address.</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="pin">PIN Code <span class="req">*</span></label>
+          <input type="text" id="pin" placeholder="6-digit PIN" maxlength="6" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,''); validateField(this, v => /^[0-9]{6}$/.test(v.trim()))" />
+          <div class="error-msg" id="err-pin">Please enter a valid 6-digit PIN code.</div>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number <span class="req">*</span></label>
+          <input type="tel" id="phone" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,''); validateField(this, v => /^[0-9]{10}$/.test(v.trim()))" />
+          <div class="error-msg" id="err-phone">Please enter a valid 10-digit phone number.</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email <span class="opt">(optional)</span></label>
+          <input type="email" id="email" placeholder="you@example.com" oninput="validateEmailField(this)" />
+          <div class="error-msg" id="err-email">Please enter a valid email address or leave empty.</div>
+        </div>
+        <div class="form-group">
+          <label for="fatherName">Father's Name <span class="req">*</span></label>
+          <input type="text" id="fatherName" placeholder="Father's full name" oninput="validateField(this, v => v.trim().length > 1)" />
+          <div class="error-msg" id="err-fatherName">Please enter father's name.</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dob">Date of Birth <span class="req">*</span></label>
+          <input type="date" id="dob" onchange="handleDobChange(this)" />
+          <div class="error-msg" id="err-dob">Please select your date of birth.</div>
+          <div class="warning-msg" id="warn-dob">Note: KCYM is typically for youth aged 15-35.</div>
+        </div>
+        <div class="form-group">
+          <label for="age">Age</label>
+          <input type="number" id="age" placeholder="Calculated automatically" readonly style="background:rgba(0,0,0,0.03); cursor:not-allowed;" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="gender">Gender <span class="req">*</span></label>
+          <select id="gender" onchange="validateField(this, v => v !== '')">
+            <option value="">Select gender</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Others</option>
+          </select>
+          <div class="error-msg" id="err-gender">Please select gender.</div>
+        </div>
+        <div class="form-group">
+          <label for="maritalStatus">Marital Status <span class="req">*</span></label>
+          <select id="maritalStatus" onchange="validateField(this, v => v !== '')">
+            <option value="">Select status</option>
+            <option>Married</option>
+            <option>Unmarried</option>
+          </select>
+          <div class="error-msg" id="err-maritalStatus">Please select marital status.</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="bloodGroup">Blood Group <span class="req">*</span></label>
+          <select id="bloodGroup" onchange="validateField(this, v => v !== '')">
+            <option value="">Select blood group</option>
+            <option>A+</option><option>A−</option>
+            <option>B+</option><option>B−</option>
+            <option>AB+</option><option>AB−</option>
+            <option>O+</option><option>O−</option>
+            <option>Unknown</option>
+          </select>
+          <div class="error-msg" id="err-bloodGroup">Please select blood group.</div>
+        </div>
+        <div class="form-group">
+          <label for="education">Educational Qualification <span class="req">*</span></label>
+          <input type="text" id="education" placeholder="e.g. B.Sc, B.Tech, 12th Pass" oninput="validateField(this, v => v.trim().length > 1)" />
+          <div class="error-msg" id="err-education">Please enter qualification.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="occupation">Occupation <span class="req">*</span></label>
+        <select id="occupation" onchange="validateField(this, v => v !== '')">
+          <option value="">Select one</option>
+          <option>School Student</option>
+          <option>College Student</option>
+          <option>Employed – Government</option>
+          <option>Employed – Private</option>
+          <option>Self-Employed / Business</option>
+          <option>Homemaker</option>
+          <option>Unemployed</option>
+          <option>Other</option>
+        </select>
+        <div class="error-msg" id="err-occupation">Please select occupation.</div>
+      </div>
+
+      <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">
+        <div class="spinner" id="btnSpinner"></div>
+        <span id="btnText">Submit & Generate PDF</span>
+      </button>
+      <p class="status-note" id="statusNote"></p>
+    </div>
+  </div>
+
+  <!-- Success Card -->
+  <div class="success-card" id="successCard">
+    <div class="success-icon">✓</div>
+    <h2>Registration Successful!</h2>
+    <p>Thank you for registering with <strong>KCYM Pakkil Unit</strong>. Your details have been securely recorded. You can now download your digital registration receipt.</p>
+    <div class="btn-wrap">
+      <button class="btn-pdf" onclick="generatePDF()">📄 Download Registration PDF</button>
+      <button class="btn-secondary" onclick="resetForm()">Register Another</button>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard View -->
+  <div class="admin-dashboard" id="adminDashboard">
+    <div class="dashboard-header">
+      <h2 class="dashboard-title">KCYM Admin Portal</h2>
+      <div class="btn-wrap">
+        <button class="btn-secondary" onclick="exportToCSV()">📤 Export CSV</button>
+        <button class="btn-secondary" onclick="exitAdmin()">Exit Dashboard</button>
+      </div>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="stat-total">0</div>
+        <div class="stat-label">Total Members</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-male">0</div>
+        <div class="stat-label">Male</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-female">0</div>
+        <div class="stat-label">Female</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-blood">0</div>
+        <div class="stat-label">Known Blood Groups</div>
+      </div>
+    </div>
+
+    <!-- Filters & Controls -->
+    <div class="controls-row">
+      <div class="search-input-wrap">
+        <input type="text" id="adminSearch" placeholder="Search by name, phone or unit..." oninput="filterAdminTable()" style="padding-left:14px;" />
+      </div>
+      <select class="filter-select" id="adminFilterBlood" onchange="filterAdminTable()">
+        <option value="">All Blood Groups</option>
+        <option>A+</option><option>A−</option>
+        <option>B+</option><option>B−</option>
+        <option>AB+</option><option>AB−</option>
+        <option>O+</option><option>O−</option>
+      </select>
+      <select class="filter-select" id="adminFilterOcc" onchange="filterAdminTable()">
+        <option value="">All Occupations</option>
+        <option>School Student</option>
+        <option>College Student</option>
+        <option>Employed</option>
+        <option>Self-Employed / Business</option>
+        <option>Unemployed / Other</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>Photo</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Blood</th>
+            <th>Age</th>
+            <th>Occupation</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="adminTableBody">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+    </div>
+    
+    <div id="noDataMsg" style="text-align:center; padding: 30px; display:none; color:var(--text-muted);">
+      <p>No registrations found matching the filters.</p>
+      <button class="btn-secondary" style="margin-top:12px; font-size:12px;" onclick="insertMockData()">Insert Demo Members</button>
+    </div>
+  </div>
+</main>
+
+<!-- Footer Section -->
+<footer>
+  <strong>KCYM Pakkil Unit</strong> · St. Theresa's Church Pakkil<br />
+  Diocese of Vijayapuram · Kerala Catholic Youth Movement<br />
+  <div class="footer-links">
+    <span class="footer-link" onclick="promptAdminLogin()">Admin Portal 🔒</span>
+  </div>
+  <br />
+  <span style="font-size:10.5px; opacity:0.75;">All data is stored locally and processed securely in compliance with regional privacy standards.</span><br /><br />
+  <span style="font-size:11px; opacity:0.65;">Made with ❤️ by <strong style="color:var(--primary);">Job Albert</strong></span>
+</footer>
+
+<!-- ---------------------------------------------------- -->
+<!-- OFF-SCREEN BILINGUAL PDF TEMPLATE WITH INLINE STYLES -->
+<div id="pdf-template" style="position: absolute; left: -9999px; top: -9999px; width: 794px; height: 1123px; padding: 50px 55px; background: #ffffff; color: #000000; font-family: 'Inter', 'Manjari', sans-serif; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;">
+  <div>
+    <!-- PDF Header -->
+    <div style="position: relative; text-align: center; margin-bottom: 25px; height: 60px; display: flex; flex-direction: column; justify-content: center;">
+      <img id="pdf-logo" src="kcym-logo.jpg" alt="KCYM Logo" style="position: absolute; left: 0; top: 0; width: 60px; height: 60px; object-fit: contain; border-radius: 50%;" onerror="this.style.display='none'" />
+      <div style="font-size: 21px; font-weight: 900; font-family: 'Manjari', sans-serif; margin: 0 auto; letter-spacing: 0.2px;">കെ.സി.വൈ.എം. വിജയപുരം രൂപത</div>
+      <div style="font-size: 16.5px; font-weight: 900; font-family: 'Manjari', sans-serif; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 5px; margin-top: 6px;">അംഗത്വ രജിസ്ട്രേഷൻ ഫോറം</div>
+    </div>
+
+    <!-- Unit / Mekala info -->
+    <div style="margin-left: 0px; margin-bottom: 25px; font-family: 'Manjari', sans-serif; font-size: 14.5px;">
+      <div style="margin-bottom: 8px; display: flex; align-items: flex-end;">
+        <span style="font-weight: 900; white-space: nowrap;">യൂണിറ്റ്:</span>
+        <span id="pdf-val-unit" style="border-bottom: 1.2px dotted #000; display: inline-block; min-width: 180px; margin-left: 5px; padding-left: 5px; min-height: 18px; font-weight: 500;"></span>
+      </div>
+      <div style="display: flex; align-items: flex-end;">
+        <span style="font-weight: 900; white-space: nowrap;">മേഖല:</span>
+        <span id="pdf-val-mekala" style="border-bottom: 1.2px dotted #000; display: inline-block; min-width: 180px; margin-left: 5px; padding-left: 5px; min-height: 18px; font-weight: 500;"></span>
+      </div>
+    </div>
+
+    <!-- Two-Column Personal Details Section -->
+    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+      <!-- Left column: fields (width: 530px) -->
+      <div style="width: 530px; display: flex; flex-direction: column;">
+        
+        <!-- Name -->
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+          <span style="font-weight: 900; white-space: nowrap;">Name:</span>
+          <span id="pdf-val-fullName" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500;"></span>
+        </div>
+        
+        <!-- Address Line 1 -->
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+          <span style="font-weight: 900; white-space: nowrap;">Address:</span>
+          <span id="pdf-val-address1" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500;"></span>
+        </div>
+        
+        <!-- Address Line 2 -->
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+          <span id="pdf-val-address2" style="flex-grow: 1; border-bottom: 1.2px dotted #000; min-height: 20px; font-weight: 500; padding-left: 8px;"></span>
+        </div>
+        
+        <!-- Address Line 3: Pin -->
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+          <span style="flex-grow: 0.65; border-bottom: 1.2px dotted #000; min-height: 20px;"></span>
+          <span style="font-weight: 900; padding: 0 10px; white-space: nowrap;">Pin</span>
+          <span id="pdf-val-pin" style="flex-grow: 0.35; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500; text-align: left;"></span>
+        </div>
+        
+        <!-- Ph -->
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+          <span style="font-weight: 900; white-space: nowrap;">Ph:</span>
+          <span id="pdf-val-phone" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500;"></span>
+        </div>
+        
+        <!-- E-mail -->
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+          <span style="font-weight: 900; white-space: nowrap;">E-mail:</span>
+          <span id="pdf-val-email" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500;"></span>
+        </div>
+        
+        <!-- Father's Name -->
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+          <span style="font-weight: 900; white-space: nowrap;">Father's Name:</span>
+          <span id="pdf-val-fatherName" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500;"></span>
+        </div>
+        
+        <!-- Date of Birth -->
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+          <span style="font-weight: 900; white-space: nowrap;">Date of Birth:</span>
+          <span id="pdf-val-dob" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500;"></span>
+        </div>
+        
+      </div>
+      
+      <!-- Right column: Photo Box (width: 140px) -->
+      <div style="width: 140px; display: flex; justify-content: flex-end; align-items: flex-start; padding-top: 5px;">
+        <div id="pdf-photo-container" style="width: 130px; height: 165px; border: 1.5px solid #000000; display: flex; align-items: center; justify-content: center; background: #ffffff; overflow: hidden; position: relative;">
+          <img id="pdf-photo" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;" />
+          <span id="pdf-photo-placeholder" style="font-size: 14px; font-weight: bold; color: #000000; font-family: 'Inter', sans-serif;">Photo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gender -->
+    <div style="display: flex; align-items: center; margin-bottom: 14px; font-size: 14.5px;">
+      <div style="width: 140px; font-weight: 900;">Gender</div>
+      <div style="margin-right: 15px; font-weight: 900;">:</div>
+      <div style="display: flex; align-items: center; margin-right: 30px;">
+        <div id="pdf-gender-male-box" style="width: 15px; height: 15px; border: 1.5px solid #000; margin-right: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; line-height: 1; font-family: 'Inter', sans-serif;"></div>
+        <span>Male</span>
+      </div>
+      <div style="display: flex; align-items: center; margin-right: 30px;">
+        <div id="pdf-gender-female-box" style="width: 15px; height: 15px; border: 1.5px solid #000; margin-right: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; line-height: 1; font-family: 'Inter', sans-serif;"></div>
+        <span>Female</span>
+      </div>
+      <div style="display: flex; align-items: center;">
+        <div id="pdf-gender-others-box" style="width: 15px; height: 15px; border: 1.5px solid #000; margin-right: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; line-height: 1; font-family: 'Inter', sans-serif;"></div>
+        <span>Others</span>
+      </div>
+    </div>
+
+    <!-- Marital Status -->
+    <div style="display: flex; align-items: center; margin-bottom: 14px; font-size: 14.5px;">
+      <div style="width: 140px; font-weight: 900;">Marital Status</div>
+      <div style="margin-right: 15px; font-weight: 900;">:</div>
+      <div style="display: flex; align-items: center; margin-right: 30px;">
+        <div id="pdf-marital-married-box" style="width: 15px; height: 15px; border: 1.5px solid #000; margin-right: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; line-height: 1; font-family: 'Inter', sans-serif;"></div>
+        <span>Married</span>
+      </div>
+      <div style="display: flex; align-items: center;">
+        <div id="pdf-marital-unmarried-box" style="width: 15px; height: 15px; border: 1.5px solid #000; margin-right: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; line-height: 1; font-family: 'Inter', sans-serif;"></div>
+        <span>Unmarried</span>
+      </div>
+    </div>
+
+    <!-- Educational Qualification -->
+    <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+      <span style="font-weight: 900; white-space: nowrap; width: 175px;">Educational Qualification</span>
+      <span style="margin-right: 15px; font-weight: 900;">:</span>
+      <span id="pdf-val-education" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500;"></span>
+    </div>
+
+    <!-- Occupation -->
+    <div style="display: flex; align-items: flex-end; margin-bottom: 30px; font-size: 14.5px;">
+      <span style="font-weight: 900; white-space: nowrap; width: 175px;">Occupation</span>
+      <span style="margin-right: 15px; font-weight: 900;">:</span>
+      <span id="pdf-val-occupation" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500;"></span>
+    </div>
+
+    <!-- Pledge -->
+    <div style="text-align: center; margin-bottom: 10px;">
+      <span style="font-size: 16.5px; font-weight: 900; font-family: 'Manjari', sans-serif; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 5px;">പ്രതിജ്ഞ</span>
+    </div>
+
+    <div style="font-size: 14px; line-height: 1.9; text-align: justify; font-family: 'Manjari', sans-serif; margin-bottom: 25px;">
+      ഞാൻ <span id="pdf-val-pledgeName" style="border-bottom: 1.2px dotted #000; display: inline-block; min-width: 250px; text-align: center; font-weight: 900; font-family: 'Manjari', sans-serif; padding: 0 5px;"></span> മുകളിൽ പറഞ്ഞിരിക്കുന്ന വിവരങ്ങളെല്ലാം സത്യമാണെന്നും കെ.സി.വൈ.എം. വിജയപുരം രൂപത ഭരണഘടന അനുശാസിക്കുന്ന എല്ലാ നിയമങ്ങളും അനുസരിച്ചുകൊള്ളാമെന്നും ഇതിനാൽ പ്രതിജ്ഞ ചെയ്യുന്നു.
+    </div>
+
+    <!-- Signatures -->
+    <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14px; font-family: 'Manjari', sans-serif;">
+      <div style="width: 45%;">
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px;">
+          <span style="font-weight: 900; white-space: nowrap;">സ്ഥലം:</span>
+          <span style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 18px; font-weight: 500;">Pakkil</span>
+        </div>
+        <div style="display: flex; align-items: flex-end;">
+          <span style="font-weight: 900; white-space: nowrap;">തീയതി:</span>
+          <span id="pdf-val-sigDate" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 18px; font-weight: 500;"></span>
+        </div>
+      </div>
+      <div style="width: 45%;">
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px;">
+          <span style="font-weight: 900; white-space: nowrap;">പേര്:</span>
+          <span id="pdf-val-sigName" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 18px; font-weight: 900;"></span>
+        </div>
+        <div style="display: flex; align-items: flex-end;">
+          <span style="font-weight: 900; white-space: nowrap;">ഒപ്പ്:</span>
+          <span style="flex-grow: 1; border-bottom: 1.2px dotted #000; min-height: 18px;"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <hr style="border: none; border-top: 1.5px solid #000000; margin: 15px 0 15px 0;" />
+
+    <!-- Office Section -->
+    <div style="text-align: center; margin-bottom: 15px;">
+      <span style="font-size: 16px; font-weight: 900; font-family: 'Manjari', sans-serif; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 5px;">ഓഫീസ് ആവശ്യങ്ങൾക്ക്</span>
+    </div>
+
+    <div style="display: flex; align-items: flex-end; margin-bottom: 40px; font-size: 14px; font-family: 'Manjari', sans-serif; max-width: 350px;">
+      <span style="font-weight: 900; white-space: nowrap;">പാസ്സാക്കിയ തീയതി:</span>
+      <span style="flex-grow: 1; border-bottom: 1.2px dotted #000; min-height: 18px;"></span>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 900; font-family: 'Manjari', sans-serif; padding: 0 10px; margin-bottom: 10px;">
+      <span>പ്രസിഡന്റ്</span>
+      <span>സെക്രട്ടറി</span>
+      <span>ഡയറക്ടർ</span>
+      <span>സീൽ</span>
+    </div>
+  </div>
+</div>
+<!-- ---------------------------------------------------- -->
+<!-- CUSTOM MODALS (LOGIN, DETAILS) -->
+<!-- ---------------------------------------------------- -->
+
+<!-- Password Dialog Modal -->
+<div class="modal-overlay" id="adminLoginModal">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeAdminModal('adminLoginModal')">×</button>
+    <h3 class="modal-title">Admin Authentication</h3>
+    <div class="modal-body">
+      <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 15px;">Please enter the administrator access password. (Default: <code>admin123</code>)</p>
+      <label for="adminPass" style="font-size:11px;">Password</label>
+      <input type="password" id="adminPass" placeholder="••••••••" style="letter-spacing:2px;" onkeydown="if(event.key==='Enter') submitAdminLogin()" />
+      <div class="error-msg" id="err-adminPass" style="display:none;">Invalid credentials. Please try again.</div>
+    </div>
+    <div class="btn-wrap" style="justify-content: flex-end;">
+      <button class="btn-secondary" style="padding: 8px 18px;" onclick="closeAdminModal('adminLoginModal')">Cancel</button>
+      <button class="btn-pdf" style="padding: 9px 22px;" onclick="submitAdminLogin()">Verify</button>
+    </div>
+  </div>
+</div>
+
+<!-- Registration Details Modal -->
+<div class="modal-overlay" id="memberDetailsModal">
+  <div class="modal-card" style="max-width: 550px;">
+    <button class="modal-close" onclick="closeAdminModal('memberDetailsModal')">×</button>
+    <h3 class="modal-title" id="detailsModalTitle">Member Details</h3>
+    
+    <div class="modal-body" style="display:flex; gap: 20px; align-items: flex-start; margin-top: 15px;">
+      <img id="detailsPhoto" src="" alt="Photo" style="width:100px; height:120px; object-fit:cover; border-radius: 8px; border:1px solid var(--border); box-shadow: var(--shadow-sm);" />
+      
+      <div style="flex-grow:1;">
+        <div class="modal-grid-details" id="detailsGrid">
+          <!-- Dynamic details filled by JS -->
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-wrap" style="justify-content: flex-end;">
+      <button class="btn-secondary" style="padding: 8px 18px;" onclick="closeAdminModal('memberDetailsModal')">Close</button>
+      <button class="btn-pdf" style="padding: 9px 22px;" id="detailsDownloadBtn">📄 Download PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwk-_Q3u9hIgYIJtFDzl4EeYxYMPvrW0j75Th2CXV-pn-LMbvXMCA9E-vKzytNu5lMNxw/exec";
+  
+  // Application State
+  let activeTheme = 'light';
+  let photoDataURL = null;
+  let activeRegistrationData = {}; // For the success screen PDF download
+  let draftSaveTimer = null;
+
+  // ----------------------------------------------------
+  // INITIALIZATION
+  // ----------------------------------------------------
+  window.addEventListener('DOMContentLoaded', () => {
+    // 1. Theme Check
+    const savedTheme = localStorage.getItem('kcym_theme');
+    if (savedTheme) {
+      setTheme(savedTheme);
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme('dark');
+    }
+
+    // 2. Draft Check
+    checkDraft();
+
+    // 3. Attach change/input listeners for auto-save
+    const formInputs = document.querySelectorAll('#formCard input, #formCard select, #formCard textarea');
+    formInputs.forEach(input => {
+      input.addEventListener('input', scheduleDraftSave);
+      input.addEventListener('change', scheduleDraftSave);
+    });
+
+    // 4. Debug/Preview Mode Check
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('preview')) {
+      const welcome = document.getElementById("welcomeBanner");
+      if (welcome) welcome.style.display = "none";
+      const reg = document.getElementById("registrationSection");
+      if (reg) reg.style.display = "none";
+      const success = document.getElementById("successCard");
+      if (success) success.style.display = "none";
+      const admin = document.getElementById("adminDashboard");
+      if (admin) admin.style.display = "none";
+      
+      // Make template visible on the page
+      const el = document.getElementById("pdf-template");
+      if (el) {
+        el.style.position = "relative";
+        el.style.left = "0";
+        el.style.top = "0";
+        el.style.margin = "40px auto";
+        el.style.boxShadow = "0 10px 25px rgba(0,0,0,0.15)";
+        document.body.appendChild(el);
+      }
+      
+      // Populate with mock details matching the photo requirements
+      const mockData = {
+        unit: "Pakkil Unit",
+        mekala: "Vijayapuram",
+        fullName: "Job Albert",
+        address: "Puthenpurayil House, Pakkil P.O., Kottayam",
+        pin: "686012",
+        phone: "9876543210",
+        email: "jobalbert@gmail.com",
+        fatherName: "Albert Joseph",
+        dob: "2000-05-12",
+        gender: "Male",
+        maritalStatus: "Unmarried",
+        education: "B.Tech Computer Science",
+        occupation: "College Student"
+      };
+      
+      // Render without downloading
+      generatePDF(mockData, false);
+    }
+  });
+
+  // ----------------------------------------------------
+  // THEME MANAGEMENT
+  // ----------------------------------------------------
+  function toggleTheme() {
+    const nextTheme = activeTheme === 'light' ? 'dark' : 'light';
+    setTheme(nextTheme);
+  }
+
+  function setTheme(theme) {
+    activeTheme = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('kcym_theme', theme);
+  }
+
+  function handleLogoError(img) {
+    img.style.border = 'none';
+    img.parentElement.style.background = 'linear-gradient(135deg, var(--secondary), #E0B000)';
+    img.style.display = 'none';
+  }
+
+  // ----------------------------------------------------
+  // IMAGE COMPRESSION & PHOTO HANDLING
+  // ----------------------------------------------------
+  function handlePhotoUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const maxW = 240;
+        const maxH = 300;
+        let width = img.width;
+        let height = img.height;
+
+        if (width / height > maxW / maxH) {
+          width = maxW;
+          height = Math.round((img.height * maxW) / img.width);
+        } else {
+          height = maxH;
+          width = Math.round((img.width * maxH) / img.height);
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        photoDataURL = canvas.toDataURL('image/jpeg', 0.82);
+        
+        const preview = document.getElementById("photoPreview");
+        preview.src = photoDataURL;
+        preview.style.display = "block";
+        document.getElementById("photoText").style.display = "none";
+        
+        document.getElementById("err-photo").style.display = "none";
+        document.getElementById("photoArea").classList.remove("invalid");
+        document.getElementById("photoArea").classList.add("valid");
+
+        saveDraft();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ----------------------------------------------------
+  // FORM INTERACTIVE VALIDATIONS
+  // ----------------------------------------------------
+  function validateField(element, checkFn) {
+    const errEl = document.getElementById("err-" + element.id);
+    const isValid = checkFn(element.value);
+
+    if (isValid) {
+      element.classList.remove("invalid");
+      element.classList.add("valid");
+      if (errEl) errEl.style.display = "none";
+    } else {
+      element.classList.remove("valid");
+      element.classList.add("invalid");
+      if (errEl) errEl.style.display = "block";
+    }
+    return isValid;
+  }
+
+  function validateEmailField(element) {
+    const value = element.value.trim();
+    if (value === "") {
+      element.classList.remove("invalid");
+      element.classList.remove("valid");
+      document.getElementById("err-email").style.display = "none";
+      return true;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return validateField(element, v => emailRegex.test(v.trim()));
+  }
+
+  function handleDobChange(input) {
+    const dobValue = input.value;
+    const errEl = document.getElementById("err-dob");
+    const warnEl = document.getElementById("warn-dob");
+    
+    if (!dobValue) {
+      input.classList.remove("valid");
+      input.classList.add("invalid");
+      errEl.style.display = "block";
+      warnEl.style.display = "none";
+      document.getElementById("age").value = "";
+      return;
+    }
+
+    input.classList.remove("invalid");
+    input.classList.add("valid");
+    errEl.style.display = "none";
+
+    const dob = new Date(dobValue);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+
+    if (age >= 0 && age < 120) {
+      document.getElementById("age").value = age;
+      if (age < 15 || age > 35) {
+        warnEl.style.display = "block";
+      } else {
+        warnEl.style.display = "none";
+      }
+    } else {
+      document.getElementById("age").value = "";
+      input.classList.add("invalid");
+      errEl.textContent = "Please select a valid date.";
+      errEl.style.display = "block";
+      warnEl.style.display = "none";
+    }
+  }
+
+  function validateForm() {
+    let isValid = true;
+
+    const rules = [
+      { id: "unit",          fn: v => v.trim().length > 1 },
+      { id: "mekala",        fn: v => v.trim().length > 1 },
+      { id: "fullName",      fn: v => v.trim().length > 1 },
+      { id: "address",       fn: v => v.trim().length > 3 },
+      { id: "pin",           fn: v => /^[0-9]{6}$/.test(v.trim()) },
+      { id: "phone",         fn: v => /^[0-9]{10}$/.test(v.trim()) },
+      { id: "fatherName",    fn: v => v.trim().length > 1 },
+      { id: "dob",           fn: v => v !== "" },
+      { id: "gender",        fn: v => v !== "" },
+      { id: "maritalStatus", fn: v => v !== "" },
+      { id: "bloodGroup",    fn: v => v !== "" },
+      { id: "education",     fn: v => v.trim().length > 1 },
+      { id: "occupation",    fn: v => v !== "" },
+    ];
+
+    rules.forEach(rule => {
+      const el = document.getElementById(rule.id);
+      if (rule.id === "dob") {
+        handleDobChange(el);
+        if (el.classList.contains("invalid")) isValid = false;
+      } else {
+        const check = validateField(el, rule.fn);
+        if (!check) isValid = false;
+      }
+    });
+
+    const emailEl = document.getElementById("email");
+    if (!validateEmailField(emailEl)) isValid = false;
+
+    const photoArea = document.getElementById("photoArea");
+    if (!photoDataURL) {
+      // Photo is optional: do not mark invalid or block submission
+      photoArea.classList.remove("invalid");
+      document.getElementById("err-photo").style.display = "none";
+    } else {
+      photoArea.classList.remove("invalid");
+      photoArea.classList.add("valid");
+      document.getElementById("err-photo").style.display = "none";
+    }
+
+    if (!isValid) {
+      const card = document.getElementById("formCard");
+      card.classList.add("card-shake");
+      setTimeout(() => card.classList.remove("card-shake"), 450);
+    }
+
+    return isValid;
+  }
+
+  // ----------------------------------------------------
+  // LOCAL STORAGE DRAFT MANAGEMENT
+  // ----------------------------------------------------
+  function scheduleDraftSave() {
+    clearTimeout(draftSaveTimer);
+    draftSaveTimer = setTimeout(saveDraft, 1000);
+  }
+
+  function saveDraft() {
+    const draftData = {
+      unit:          document.getElementById("unit").value,
+      mekala:        document.getElementById("mekala").value,
+      fullName:      document.getElementById("fullName").value,
+      address:       document.getElementById("address").value,
+      pin:           document.getElementById("pin").value,
+      phone:         document.getElementById("phone").value,
+      email:         document.getElementById("email").value,
+      fatherName:    document.getElementById("fatherName").value,
+      dob:           document.getElementById("dob").value,
+      age:           document.getElementById("age").value,
+      gender:        document.getElementById("gender").value,
+      maritalStatus: document.getElementById("maritalStatus").value,
+      bloodGroup:    document.getElementById("bloodGroup").value,
+      education:     document.getElementById("education").value,
+      occupation:    document.getElementById("occupation").value,
+      photo:         photoDataURL
+    };
+    
+    if (draftData.fullName.trim() || draftData.phone.trim()) {
+      localStorage.setItem('kcym_registration_draft', JSON.stringify(draftData));
+    }
+  }
+
+  function checkDraft() {
+    const savedDraft = localStorage.getItem('kcym_registration_draft');
+    if (savedDraft) {
+      document.getElementById("draftToast").style.display = "flex";
+    }
+  }
+
+  function restoreDraft() {
+    const savedDraft = localStorage.getItem('kcym_registration_draft');
+    if (!savedDraft) return;
+
+    const draft = JSON.parse(savedDraft);
+    const fields = ["unit", "mekala", "fullName", "address", "pin", "phone", "email", "fatherName", "dob", "age", "gender", "maritalStatus", "bloodGroup", "education", "occupation"];
+
+    fields.forEach(f => {
+      const el = document.getElementById(f);
+      if (el && draft[f] !== undefined) {
+        el.value = draft[f];
+        if (f !== 'age' && f !== 'email') el.classList.add("valid");
+      }
+    });
+
+    const emailEl = document.getElementById("email");
+    if (emailEl.value) validateEmailField(emailEl);
+    
+    const dobEl = document.getElementById("dob");
+    if (dobEl.value) handleDobChange(dobEl);
+
+    if (draft.photo) {
+      photoDataURL = draft.photo;
+      const preview = document.getElementById("photoPreview");
+      preview.src = photoDataURL;
+      preview.style.display = "block";
+      document.getElementById("photoText").style.display = "none";
+      document.getElementById("photoArea").classList.add("valid");
+    }
+
+    clearDraftToast();
+  }
+
+  function clearDraftToast() {
+    document.getElementById("draftToast").style.display = "none";
+  }
+
+  function deleteDraft() {
+    localStorage.removeItem('kcym_registration_draft');
+  }
+
+  function resetForm() {
+    // Hide success card, show form section and welcome banner
+    document.getElementById("successCard").style.display = "none";
+    document.getElementById("registrationSection").style.display = "block";
+    document.getElementById("welcomeBanner").style.display = "block";
+
+    // Reset application state variables
+    photoDataURL = null;
+    activeRegistrationData = {};
+
+    // Reset all form inputs and validation classes
+    const formInputs = document.querySelectorAll('#formCard input, #formCard select, #formCard textarea');
+    formInputs.forEach(input => {
+      input.value = "";
+      input.classList.remove("valid", "invalid");
+    });
+
+    // Reset photo upload preview and text
+    const preview = document.getElementById("photoPreview");
+    if (preview) {
+      preview.src = "";
+      preview.style.display = "none";
+    }
+    const photoText = document.getElementById("photoText");
+    if (photoText) {
+      photoText.style.display = "block";
+    }
+    const photoArea = document.getElementById("photoArea");
+    if (photoArea) {
+      photoArea.classList.remove("valid", "invalid");
+    }
+
+    // Hide all validation error and warning messages
+    const errMessages = document.querySelectorAll(".error-msg, .warning-msg");
+    errMessages.forEach(msg => {
+      msg.style.display = "none";
+    });
+
+    // Reset submit button state
+    const btn = document.getElementById("submitBtn");
+    const spinner = document.getElementById("btnSpinner");
+    const text = document.getElementById("btnText");
+    const note = document.getElementById("statusNote");
+    if (btn) btn.disabled = false;
+    if (spinner) spinner.style.display = "none";
+    if (text) text.textContent = "Submit & Generate PDF";
+    if (note) note.textContent = "";
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // ----------------------------------------------------
+  // SUBMISSION
+  // ----------------------------------------------------
+  async function handleSubmit() {
+    if (!validateForm()) return;
+
+    const btn = document.getElementById("submitBtn");
+    const spinner = document.getElementById("btnSpinner");
+    const text = document.getElementById("btnText");
+    const note = document.getElementById("statusNote");
+
+    btn.disabled = true;
+    spinner.style.display = "block";
+    text.textContent = "Submitting Data...";
+    note.textContent = "Connecting to the server. Please do not close the browser.";
+
+    activeRegistrationData = {
+      id:            "REG-" + Date.now().toString().slice(-6),
+      timestamp:     new Date().toLocaleString("en-IN", {timeZone:"Asia/Kolkata"}),
+      unit:          document.getElementById("unit").value.trim(),
+      mekala:        document.getElementById("mekala").value.trim(),
+      fullName:      document.getElementById("fullName").value.trim(),
+      address:       document.getElementById("address").value.trim(),
+      pin:           document.getElementById("pin").value.trim(),
+      phone:         document.getElementById("phone").value.trim(),
+      email:         document.getElementById("email").value.trim() || "-",
+      fatherName:    document.getElementById("fatherName").value.trim(),
+      dob:           document.getElementById("dob").value,
+      age:           document.getElementById("age").value,
+      gender:        document.getElementById("gender").value,
+      maritalStatus: document.getElementById("maritalStatus").value,
+      bloodGroup:    document.getElementById("bloodGroup").value,
+      education:     document.getElementById("education").value.trim(),
+      occupation:    document.getElementById("occupation").value,
+      photo:         photoDataURL
+    };
+
+    // Google Sheet Submission
+    const params = new URLSearchParams();
+    Object.keys(activeRegistrationData).forEach(k => {
+      if (k !== 'photo' && k !== 'id') {
+        params.append(k, activeRegistrationData[k]);
+      }
+    });
+
+    try {
+      await fetch(SCRIPT_URL + "?" + params.toString(), { method: "GET", mode: "no-cors" });
+    } catch(e) {
+      console.warn("Google Sheet sync failed, but proceeding locally.", e);
+    }
+
+    // Save locally
+    const savedRegs = localStorage.getItem('kcym_registrations');
+    const regsList = savedRegs ? JSON.parse(savedRegs) : [];
+    regsList.push(activeRegistrationData);
+    localStorage.setItem('kcym_registrations', JSON.stringify(regsList));
+
+    deleteDraft();
+
+    document.getElementById("registrationSection").style.display = "none";
+    document.getElementById("welcomeBanner").style.display = "none";
+    document.getElementById("successCard").style.display = "block";
+    
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    
+    btn.disabled = false;
+    spinner.style.display = "none";
+    text.textContent = "Submit & Generate PDF";
+    note.textContent = "";
+
+    triggerConfetti();
+  }
+
+  function triggerConfetti() {
+    const duration = 2.5 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 25, spread: 360, ticks: 50, zIndex: 1000 };
+
+    function randomInRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    const interval = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+      if (timeLeft <= 0) return clearInterval(interval);
+
+      const particleCount = 40 * (timeLeft / duration);
+      confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+      confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+    }, 250);
+  }
+
+  // ----------------------------------------------------
+  // PDF GENERATION (HTML-TO-PDF)
+  // ----------------------------------------------------
+  function generatePDF(customData, shouldSave = true) {
+    const data = customData || activeRegistrationData;
+    if (!data.fullName) return;
+
+    // Populate PDF Template
+    document.getElementById("pdf-val-unit").textContent = data.unit || "";
+    document.getElementById("pdf-val-mekala").textContent = data.mekala || "";
+    document.getElementById("pdf-val-fullName").textContent = data.fullName || "";
+    
+    // Address splitting into two lines
+    const addr = data.address || "";
+    let addr1 = addr;
+    let addr2 = "";
+    if (addr.length > 40) {
+      const splitIdx = addr.lastIndexOf(',', 40) !== -1 ? addr.lastIndexOf(',', 40) + 1 : addr.indexOf(' ', 35);
+      if (splitIdx > 0) {
+        addr1 = addr.slice(0, splitIdx).trim();
+        addr2 = addr.slice(splitIdx).trim();
+      } else {
+        addr1 = addr.slice(0, 40);
+        addr2 = addr.slice(40);
+      }
+    }
+    document.getElementById("pdf-val-address1").textContent = addr1;
+    document.getElementById("pdf-val-address2").textContent = addr2;
+    
+    document.getElementById("pdf-val-pin").textContent = data.pin || "";
+    document.getElementById("pdf-val-phone").textContent = data.phone || "";
+    document.getElementById("pdf-val-email").textContent = data.email || "";
+    document.getElementById("pdf-val-fatherName").textContent = data.fatherName || "";
+    document.getElementById("pdf-val-dob").textContent = formatDate(data.dob);
+
+    // Populate Custom Checkboxes with checkmark
+    document.getElementById("pdf-gender-male-box").textContent = data.gender === "Male" ? "✓" : "";
+    document.getElementById("pdf-gender-female-box").textContent = data.gender === "Female" ? "✓" : "";
+    document.getElementById("pdf-gender-others-box").textContent = data.gender === "Others" ? "✓" : "";
+    
+    document.getElementById("pdf-marital-married-box").textContent = data.maritalStatus === "Married" ? "✓" : "";
+    document.getElementById("pdf-marital-unmarried-box").textContent = data.maritalStatus === "Unmarried" ? "✓" : "";
+
+    document.getElementById("pdf-val-education").textContent = data.education || "";
+    document.getElementById("pdf-val-occupation").textContent = data.occupation || "";
+    
+    document.getElementById("pdf-val-pledgeName").textContent = data.fullName || "";
+    document.getElementById("pdf-val-sigName").textContent = data.fullName || "";
+    
+    const sigDate = data.timestamp ? data.timestamp.split(',')[0] : new Date().toLocaleDateString("en-IN");
+    document.getElementById("pdf-val-sigDate").textContent = sigDate;
+
+    const pdfPhoto = document.getElementById("pdf-photo");
+    const pdfPhotoPlaceholder = document.getElementById("pdf-photo-placeholder");
+    if (data.photo) {
+      pdfPhoto.src = data.photo;
+      pdfPhoto.style.display = "block";
+      pdfPhotoPlaceholder.style.display = "none";
+    } else {
+      pdfPhoto.src = "";
+      pdfPhoto.style.display = "none";
+      pdfPhotoPlaceholder.style.display = "block";
+    }
+
+    // Configure and save
+    const element = document.getElementById("pdf-template");
+    const filename = "KCYM_Reg_" + data.fullName.trim().replace(/\s+/g, "_") + ".pdf";
+    
+    const opt = {
+      margin:       0,
+      filename:     filename,
+      image:        { type: 'jpeg', quality: 0.98 },
+      html2canvas:  { scale: 2, useCORS: true, logging: false },
+      jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+    };
+
+    if (shouldSave) {
+      html2pdf().set(opt).from(element).save();
+    }
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return "";
+    try {
+      const [year, month, day] = dateStr.split('-');
+      return `${day}/${month}/${year}`;
+    } catch(e) {
+      return dateStr;
+    }
+  }
+
+  // ----------------------------------------------------
+  // ADMIN & DASHBOARD LOGIC
+  // ----------------------------------------------------
+  function promptAdminLogin() {
+    document.getElementById("adminPass").value = "";
+    document.getElementById("err-adminPass").style.display = "none";
+    document.getElementById("adminLoginModal").style.display = "flex";
+    document.getElementById("adminPass").focus();
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAdminModal('adminLoginModal');
+      closeAdminModal('memberDetailsModal');
+    }
+  });
+
+  function closeAdminModal(modalId) {
+    document.getElementById(modalId).style.display = "none";
+  }
+
+  function submitAdminLogin() {
+    const pass = document.getElementById("adminPass").value;
+    if (pass === "admin123") {
+      closeAdminModal("adminLoginModal");
+      enterAdminDashboard();
+    } else {
+      document.getElementById("err-adminPass").style.display = "block";
+    }
+  }
+
+  function enterAdminDashboard() {
+    document.getElementById("registrationSection").style.display = "none";
+    document.getElementById("successCard").style.display = "none";
+    document.getElementById("welcomeBanner").style.display = "none";
+    document.getElementById("adminDashboard").style.display = "block";
+    
+    renderAdminTable();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function exitAdmin() {
+    document.getElementById("adminDashboard").style.display = "none";
+    document.getElementById("registrationSection").style.display = "block";
+    document.getElementById("welcomeBanner").style.display = "block";
+  }
+
+  function getRegistrations() {
+    const regs = localStorage.getItem('kcym_registrations');
+    return regs ? JSON.parse(regs) : [];
+  }
+
+  function renderAdminTable() {
+    const regs = getRegistrations();
+    
+    document.getElementById("stat-total").textContent = regs.length;
+    
+    const males = regs.filter(r => r.gender === 'Male').length;
+    document.getElementById("stat-male").textContent = males;
+    
+    const females = regs.filter(r => r.gender === 'Female').length;
+    document.getElementById("stat-female").textContent = females;
+    
+    const knownBlood = regs.filter(r => r.bloodGroup !== 'Unknown' && r.bloodGroup !== '').length;
+    document.getElementById("stat-blood").textContent = knownBlood;
+
+    const tbody = document.getElementById("adminTableBody");
+    tbody.innerHTML = "";
+
+    if (regs.length === 0) {
+      document.getElementById("noDataMsg").style.display = "block";
+      return;
+    } else {
+      document.getElementById("noDataMsg").style.display = "none";
+    }
+
+    regs.forEach((reg, index) => {
+      const tr = document.createElement("tr");
+      tr.className = "admin-table-row";
+
+      const photoCell = document.createElement("td");
+      if (reg.photo) {
+        const img = document.createElement("img");
+        img.src = reg.photo;
+        img.className = "table-thumbnail";
+        photoCell.appendChild(img);
+      } else {
+        const placeholder = document.createElement("div");
+        placeholder.className = "table-avatar-placeholder";
+        placeholder.textContent = "👤";
+        photoCell.appendChild(placeholder);
+      }
+      tr.appendChild(photoCell);
+
+      const nameCell = document.createElement("td");
+      nameCell.style.fontWeight = "600";
+      nameCell.textContent = reg.fullName;
+      tr.appendChild(nameCell);
+
+      const phoneCell = document.createElement("td");
+      phoneCell.textContent = reg.phone;
+      tr.appendChild(phoneCell);
+
+      const bloodCell = document.createElement("td");
+      bloodCell.innerHTML = `<span style="display:inline-block; padding: 2px 8px; border-radius:4px; font-weight:700; background:rgba(200,16,46,0.1); color:var(--primary);">${reg.bloodGroup}</span>`;
+      tr.appendChild(bloodCell);
+
+      const ageCell = document.createElement("td");
+      ageCell.textContent = reg.age || "-";
+      tr.appendChild(ageCell);
+
+      const occCell = document.createElement("td");
+      occCell.textContent = reg.occupation || "-";
+      tr.appendChild(occCell);
+
+      const actionsCell = document.createElement("td");
+      actionsCell.className = "actions-cell";
+      
+      const viewBtn = document.createElement("button");
+      viewBtn.className = "btn-action-view";
+      viewBtn.textContent = "View";
+      viewBtn.onclick = () => viewMemberDetails(index);
+      actionsCell.appendChild(viewBtn);
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "btn-action-delete";
+      deleteBtn.textContent = "Delete";
+      deleteBtn.onclick = () => deleteRegistration(index);
+      actionsCell.appendChild(deleteBtn);
+
+      tr.appendChild(actionsCell);
+      tbody.appendChild(tr);
+    });
+  }
+
+  function filterAdminTable() {
+    const searchVal = document.getElementById("adminSearch").value.toLowerCase();
+    const bloodVal = document.getElementById("adminFilterBlood").value;
+    const occVal = document.getElementById("adminFilterOcc").value;
+
+    const rows = document.querySelectorAll(".admin-table-row");
+    let matchCount = 0;
+
+    rows.forEach((row, idx) => {
+      const regs = getRegistrations();
+      const reg = regs[idx];
+      if (!reg) return;
+
+      const nameMatch = reg.fullName.toLowerCase().includes(searchVal) || 
+                        reg.phone.includes(searchVal) || 
+                        reg.unit.toLowerCase().includes(searchVal);
+      const bloodMatch = bloodVal === "" || reg.bloodGroup === bloodVal;
+      
+      let occMatch = true;
+      if (occVal !== "") {
+        if (occVal === "Employed") {
+          occMatch = reg.occupation.includes("Employed");
+        } else if (occVal === "Unemployed / Other") {
+          occMatch = reg.occupation === "Unemployed" || reg.occupation === "Other" || reg.occupation === "Homemaker";
+        } else {
+          occMatch = reg.occupation === occVal;
+        }
+      }
+
+      if (nameMatch && bloodMatch && occMatch) {
+        row.style.display = "";
+        matchCount++;
+      } else {
+        row.style.display = "none";
+      }
+    });
+
+    const noData = document.getElementById("noDataMsg");
+    noData.style.display = matchCount === 0 ? "block" : "none";
+  }
+
+  function viewMemberDetails(index) {
+    const regs = getRegistrations();
+    const reg = regs[index];
+    if (!reg) return;
+
+    document.getElementById("detailsModalTitle").textContent = reg.fullName;
+    
+    const photo = document.getElementById("detailsPhoto");
+    if (reg.photo) {
+      photo.src = reg.photo;
+      photo.style.display = "block";
+    } else {
+      photo.src = "";
+      photo.style.display = "none";
+    }
+
+    const grid = document.getElementById("detailsGrid");
+    grid.innerHTML = `
+      <div class="modal-grid-label">Unit / Mekala</div>
+      <div class="modal-grid-val">${reg.unit} / ${reg.mekala}</div>
+      <div class="modal-grid-label">Address</div>
+      <div class="modal-grid-val">${reg.address}, PIN: ${reg.pin}</div>
+      <div class="modal-grid-label">Contact</div>
+      <div class="modal-grid-val">${reg.phone}<br><span style="font-size:12px; color:var(--text-muted);">${reg.email}</span></div>
+      <div class="modal-grid-label">Father's Name</div>
+      <div class="modal-grid-val">${reg.fatherName}</div>
+      <div class="modal-grid-label">DOB / Age</div>
+      <div class="modal-grid-val">${formatDate(reg.dob)} (Age ${reg.age || "-"})</div>
+      <div class="modal-grid-label">Gender / Status</div>
+      <div class="modal-grid-val">${reg.gender} / ${reg.maritalStatus}</div>
+      <div class="modal-grid-label">Blood Group</div>
+      <div class="modal-grid-val"><strong style="color:var(--primary);">${reg.bloodGroup}</strong></div>
+      <div class="modal-grid-label">Qual. / Job</div>
+      <div class="modal-grid-val">${reg.education} · ${reg.occupation}</div>
+    `;
+
+    const dlBtn = document.getElementById("detailsDownloadBtn");
+    dlBtn.onclick = () => generatePDF(reg);
+
+    document.getElementById("memberDetailsModal").style.display = "flex";
+  }
+
+  function deleteRegistration(index) {
+    if (confirm("Are you sure you want to delete this member's registration? This action cannot be undone.")) {
+      const regs = getRegistrations();
+      regs.splice(index, 1);
+      localStorage.setItem('kcym_registrations', JSON.stringify(regs));
+      renderAdminTable();
+    }
+  }
+
+  function exportToCSV() {
+    const regs = getRegistrations();
+    if (regs.length === 0) {
+      alert("No registration data available to export.");
+      return;
+    }
+
+    const headers = ["ID", "Timestamp", "Unit", "Mekala", "Full Name", "Address", "PIN", "Phone", "Email", "Father's Name", "DOB", "Age", "Gender", "Marital Status", "Blood Group", "Education", "Occupation"];
+    const rows = regs.map(r => [
+      r.id || "",
+      r.timestamp || "",
+      `"${(r.unit || "").replace(/"/g, '""')}"`,
+      `"${(r.mekala || "").replace(/"/g, '""')}"`,
+      `"${(r.fullName || "").replace(/"/g, '""')}"`,
+      `"${(r.address || "").replace(/"/g, '""')}"`,
+      r.pin || "",
+      r.phone || "",
+      r.email || "",
+      `"${(r.fatherName || "").replace(/"/g, '""')}"`,
+      r.dob || "",
+      r.age || "",
+      r.gender || "",
+      r.maritalStatus || "",
+      r.bloodGroup || "",
+      `"${(r.education || "").replace(/"/g, '""')}"`,
+      r.occupation || ""
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `KCYM_Pakkil_Registrations_${new Date().toLocaleDateString("en-IN").replace(/\//g, "_")}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  function insertMockData() {
+    const mockData = [
+      {
+        id: "REG-094821",
+        timestamp: new Date().toLocaleString("en-IN"),
+        unit: "Pakkil Unit",
+        mekala: "Vijayapuram",
+        fullName: "Albin Joseph",
+        address: "Thoppil House, Pakkil P.O., Kottayam",
+        pin: "686012",
+        phone: "9876543210",
+        email: "albin@gmail.com",
+        fatherName: "Joseph T. J.",
+        dob: "2002-05-14",
+        age: "24",
+        gender: "Male",
+        maritalStatus: "Unmarried",
+        bloodGroup: "O+",
+        education: "B.Tech Computer Science",
+        occupation: "Employed – Private",
+        photo: ""
+      },
+      {
+        id: "REG-123490",
+        timestamp: new Date().toLocaleString("en-IN"),
+        unit: "Pakkil Unit",
+        mekala: "Vijayapuram",
+        fullName: "Anjali Maria",
+        address: "Kalarickal, Nattakom P.O., Kottayam",
+        pin: "686013",
+        phone: "8765432109",
+        email: "anjali.maria@yahoo.com",
+        fatherName: "George K. M.",
+        dob: "2004-10-22",
+        age: "21",
+        gender: "Female",
+        maritalStatus: "Unmarried",
+        bloodGroup: "A+",
+        education: "B.Sc Physics",
+        occupation: "College Student",
+        photo: ""
+      },
+      {
+        id: "REG-874294",
+        timestamp: new Date().toLocaleString("en-IN"),
+        unit: "Pakkil Unit",
+        mekala: "Vijayapuram",
+        fullName: "Jerin K. Tom",
+        address: "Kunnumpurath, Pakkil, Kottayam",
+        pin: "686012",
+        phone: "7654321098",
+        email: "jerintom@outlook.com",
+        fatherName: "Tom K. V.",
+        dob: "1998-02-03",
+        age: "28",
+        gender: "Male",
+        maritalStatus: "Married",
+        bloodGroup: "B+",
+        education: "MBA Finance",
+        occupation: "Self-Employed / Business",
+        photo: ""
+      }
+    ];
+
+    localStorage.setItem('kcym_registrations', JSON.stringify(mockData));
+    renderAdminTable();
+  }
+</script>
+</body>
+</html>
