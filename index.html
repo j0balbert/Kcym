@@ -1,0 +1,2767 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KCYM Pakkil Unit – Member Registration Portal</title>
+  
+  <!-- Premium Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,800;1,700&family=Inter:wght@300;400;500;600;700&family=Manjari:wght@400;700&display=swap" rel="stylesheet" crossorigin="anonymous" />
+  
+  <!-- jsPDF and html-to-image for high-fidelity Indic/bilingual PDF rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+  
+  <!-- Canvas Confetti for celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    /* Reset & CSS Variables */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    
+    :root {
+      --primary: #C8102E;      /* Deep Crimson */
+      --primary-hover: #A30D24;
+      --secondary: #F5C300;    /* Warm Gold */
+      --secondary-rgb: 245, 195, 0;
+      --bg: #F9FAFB;
+      --card-bg: #FFFFFF;
+      --text: #111827;
+      --text-muted: #6B7280;
+      --border: #E5E7EB;
+      --input-bg: #FFFFFF;
+      --input-focus: rgba(200, 16, 46, 0.1);
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+      --radius-sm: 8px;
+      --radius-md: 12px;
+      --radius-lg: 20px;
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      --success: #10B981;
+      --error: #EF4444;
+      --warning: #F59E0B;
+    }
+
+    [data-theme="dark"] {
+      --primary: #EF4444;      /* Slightly brighter red for dark mode */
+      --primary-hover: #F87171;
+      --secondary: #FBBF24;
+      --secondary-rgb: 251, 191, 36;
+      --bg: #0B0F19;
+      --card-bg: #151D30;
+      --text: #F9FAFB;
+      --text-muted: #9CA3AF;
+      --border: #242E42;
+      --input-bg: #1E293B;
+      --input-focus: rgba(239, 68, 68, 0.15);
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.5);
+      --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+      --shadow-lg: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 8px 10px -6px rgba(0, 0, 0, 0.4);
+    }
+
+    body {
+      font-family: 'Inter', 'Manjari', sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      transition: var(--transition);
+      line-height: 1.5;
+      overflow-x: hidden;
+    }
+
+    /* Header & Branding */
+    .header-band {
+      background: linear-gradient(135deg, #9a0b22 0%, #C8102E 50%, #730718 100%);
+      padding: 30px 20px 15px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+    
+    .header-band::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(45deg, transparent, transparent 20px, rgba(255,255,255,0.02) 20px, rgba(255,255,255,0.02) 40px);
+      pointer-events: none;
+    }
+
+    .theme-toggle-wrap {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 10;
+    }
+
+    .theme-toggle-btn {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: var(--transition);
+    }
+
+    .theme-toggle-btn:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.1);
+    }
+
+    .theme-toggle-btn svg {
+      width: 20px;
+      height: 20px;
+      fill: currentColor;
+    }
+
+    [data-theme="light"] .sun-icon,
+    [data-theme="dark"] .moon-icon {
+      display: none;
+    }
+
+    .gold-stripe {
+      height: 6px;
+      background: var(--secondary);
+      box-shadow: 0 2px 8px rgba(var(--secondary-rgb), 0.4);
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 1;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+
+    .logo-wrap {
+      display: inline-block;
+      background: transparent;
+      padding: 0;
+      margin-bottom: 16px;
+      transition: var(--transition);
+    }
+
+    .logo-wrap:hover {
+      transform: scale(1.05);
+    }
+
+    .logo-wrap img {
+      width: auto;
+      height: 120px;
+      display: block;
+      object-fit: contain;
+    }
+
+    .org-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255, 255, 255, 0.7);
+      margin-bottom: 6px;
+    }
+
+    .site-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(24px, 5vw, 36px);
+      font-weight: 800;
+      color: #fff;
+      line-height: 1.2;
+    }
+
+    .site-title span {
+      color: var(--secondary);
+    }
+
+    .site-subtitle {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.85);
+      margin-top: 6px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .diocese-tag {
+      display: inline-block;
+      margin-top: 12px;
+      font-size: 11px;
+      font-weight: 500;
+      color: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      padding: 4px 14px;
+      border-radius: 20px;
+      letter-spacing: 0.5px;
+      background: rgba(0, 0, 0, 0.15);
+    }
+
+    /* Welcome Banner */
+    .welcome {
+      background: var(--secondary);
+      padding: 16px 20px;
+      text-align: center;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    }
+
+    .welcome p {
+      font-size: 13.5px;
+      font-weight: 600;
+      color: #5a3e00;
+      line-height: 1.6;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    /* Main Container */
+    main {
+      max-width: 760px;
+      margin: 0 auto;
+      padding: 30px 20px 60px;
+    }
+
+    .section-header {
+      margin-bottom: 24px;
+      text-align: center;
+    }
+
+    .section-heading {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 6px;
+    }
+
+    .section-sub {
+      font-size: 13.5px;
+      color: var(--text-muted);
+    }
+
+    /* Glassmorphic Form Card */
+    .form-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 36px 30px;
+      box-shadow: var(--shadow-lg);
+      transition: var(--transition);
+      position: relative;
+    }
+
+    /* Shake Animation for Validation Errors */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%, 60% { transform: translateX(-6px); }
+      40%, 80% { transform: translateX(6px); }
+    }
+
+    .card-shake {
+      animation: shake 0.4s ease-in-out;
+    }
+
+    /* Section Labels inside Form */
+    .section-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .section-label::after {
+      content: '';
+      height: 1px;
+      flex-grow: 1;
+      background: var(--border);
+    }
+
+    /* Form Layout Elements */
+    .form-group {
+      margin-bottom: 20px;
+      position: relative;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .form-row {
+        grid-template-columns: 1fr;
+        gap: 0;
+      }
+      .form-card {
+        padding: 24px 16px;
+      }
+    }
+
+    label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--text);
+      margin-bottom: 6px;
+      transition: var(--transition);
+    }
+
+    label .req {
+      color: var(--primary);
+      margin-left: 2px;
+    }
+
+    label .opt {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 10px;
+      text-transform: none;
+      letter-spacing: 0;
+      margin-left: 4px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 11px 14px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14.5px;
+      color: var(--text);
+      background-color: var(--input-bg);
+      outline: none;
+      transition: var(--transition);
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--input-focus);
+    }
+
+    select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23666' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+      padding-right: 38px;
+    }
+
+    [data-theme="dark"] select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23ccc' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+    }
+
+    textarea {
+      resize: vertical;
+    }
+
+    input.valid, select.valid, textarea.valid {
+      border-color: var(--success);
+    }
+    
+    input.invalid, select.invalid, textarea.invalid {
+      border-color: var(--error);
+    }
+
+    .error-msg {
+      font-size: 11.5px;
+      color: var(--error);
+      margin-top: 4px;
+      display: none;
+      font-weight: 500;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    .warning-msg {
+      font-size: 11.5px;
+      color: var(--warning);
+      margin-top: 4px;
+      display: none;
+      font-weight: 500;
+      animation: fadeIn 0.2s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-3px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Photo Upload Area */
+    .photo-upload-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .photo-upload-area {
+      border: 2px dashed var(--border);
+      border-radius: var(--radius-md);
+      width: 100%;
+      height: 140px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: var(--transition);
+      position: relative;
+      overflow: hidden;
+      background: rgba(0,0,0,0.01);
+    }
+
+    .photo-upload-area:hover {
+      border-color: var(--primary);
+      background: var(--input-focus);
+    }
+
+    .photo-upload-area img {
+      width: 90px;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 6px;
+      display: none;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .photo-upload-area p {
+      font-size: 12.5px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      font-weight: 500;
+      text-align: center;
+      padding: 0 10px;
+    }
+
+    .photo-upload-area input[type="file"] {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      cursor: pointer;
+      width: 100%;
+      height: 100%;
+    }
+
+    /* Submit Button & States */
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: #fff;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      border: none;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      margin-top: 10px;
+      transition: var(--transition);
+      box-shadow: 0 4px 12px rgba(200, 16, 46, 0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .btn-submit:hover:not(:disabled) {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(200, 16, 46, 0.3);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.75;
+      cursor: not-allowed;
+    }
+
+    .spinner {
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid rgba(255,255,255,0.3);
+      border-radius: 50%;
+      border-top-color: #fff;
+      animation: spin 0.8s linear infinite;
+      display: none;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .status-note {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: center;
+      margin-top: 12px;
+    }
+
+    /* Draft Toast */
+    .toast {
+      display: none;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 16px;
+      box-shadow: var(--shadow-lg);
+      margin-bottom: 20px;
+      align-items: center;
+      justify-content: space-between;
+      animation: slideDown 0.3s ease-out;
+      font-size: 13px;
+    }
+
+    .toast-text {
+      font-weight: 500;
+      color: var(--text);
+    }
+
+    .toast-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .toast-btn {
+      background: none;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 13px;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .toast-btn-restore { color: var(--primary); }
+    .toast-btn-clear { color: var(--text-muted); }
+
+    @keyframes slideDown {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Success Card */
+    .success-card {
+      display: none;
+      text-align: center;
+      padding: 48px 30px;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .success-icon {
+      width: 70px;
+      height: 70px;
+      background: rgba(16, 185, 129, 0.1);
+      color: var(--success);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      font-size: 32px;
+      border: 1.5px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .success-card h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .success-card p {
+      font-size: 14.5px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      max-width: 500px;
+      margin: 0 auto 20px;
+    }
+
+    .btn-wrap {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .btn-pdf {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 28px;
+      background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+      color: #fff;
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      font-family: 'Inter', sans-serif;
+      transition: var(--transition);
+      box-shadow: 0 4px 10px rgba(200, 16, 46, 0.15);
+    }
+
+    .btn-pdf:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 14px rgba(200, 16, 46, 0.25);
+    }
+
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 26px;
+      background: var(--card-bg);
+      color: var(--text);
+      border-radius: var(--radius-md);
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--border);
+      font-family: 'Inter', sans-serif;
+      transition: var(--transition);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg);
+      border-color: var(--text-muted);
+    }
+
+    /* Admin Dashboard Panel */
+    .admin-dashboard {
+      display: none;
+      animation: fadeIn 0.4s ease-in-out;
+    }
+
+    .dashboard-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .dashboard-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--primary);
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+      gap: 15px;
+      margin-bottom: 24px;
+    }
+
+    .stat-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      text-align: center;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-val {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--primary);
+      margin-bottom: 2px;
+    }
+
+    .stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: var(--text-muted);
+    }
+
+    /* Filters & Controls */
+    .controls-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+
+    .search-input-wrap {
+      flex-grow: 1;
+      position: relative;
+      min-width: 200px;
+    }
+
+    .filter-select {
+      width: auto;
+      min-width: 140px;
+    }
+
+    /* Table styles */
+    .table-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      overflow-x: auto;
+      box-shadow: var(--shadow);
+      margin-bottom: 20px;
+    }
+
+    table.dashboard-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 13.5px;
+    }
+
+    table.dashboard-table th {
+      background: rgba(0,0,0,0.02);
+      padding: 12px 16px;
+      font-weight: 600;
+      border-bottom: 1.5px solid var(--border);
+      color: var(--text);
+    }
+
+    [data-theme="dark"] table.dashboard-table th {
+      background: rgba(255,255,255,0.02);
+    }
+
+    table.dashboard-table td {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+      color: var(--text);
+    }
+
+    .table-thumbnail {
+      width: 32px;
+      height: 40px;
+      object-fit: cover;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .table-avatar-placeholder {
+      width: 32px;
+      height: 40px;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+
+    .actions-cell {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-action-view {
+      padding: 6px 12px;
+      background: rgba(var(--secondary-rgb), 0.15);
+      color: var(--text);
+      border: 1px solid rgba(var(--secondary-rgb), 0.3);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-action-view:hover {
+      background: var(--secondary);
+      color: #000;
+    }
+
+    .btn-action-delete {
+      padding: 6px 12px;
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--error);
+      border: 1px solid rgba(239, 68, 68, 0.2);
+      border-radius: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .btn-action-delete:hover {
+      background: var(--error);
+      color: #fff;
+    }
+
+    /* Modals */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      backdrop-filter: blur(4px);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    .modal-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 28px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      animation: scaleUp 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes scaleUp {
+      from { transform: scale(0.95); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    .modal-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: var(--primary);
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 20px;
+    }
+
+    .modal-close:hover {
+      color: var(--text);
+    }
+
+    .modal-body {
+      margin-bottom: 20px;
+    }
+
+    .modal-grid-details {
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 8px 12px;
+      font-size: 13.5px;
+      margin-top: 15px;
+    }
+
+    .modal-grid-label {
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+
+    .modal-grid-val {
+      color: var(--text);
+      word-break: break-word;
+    }
+
+    /* Footer styling */
+    footer {
+      text-align: center;
+      padding: 28px 20px;
+      border-top: 1px solid var(--border);
+      font-size: 12px;
+      color: var(--text-muted);
+      line-height: 1.6;
+      background: rgba(0, 0, 0, 0.01);
+      transition: var(--transition);
+    }
+
+    [data-theme="dark"] footer {
+      background: rgba(255, 255, 255, 0.01);
+    }
+
+    footer strong {
+      color: var(--primary);
+    }
+
+    .footer-links {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      font-weight: 600;
+    }
+
+    .footer-link {
+      color: var(--text-muted);
+      text-decoration: none;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .footer-link:hover {
+      color: var(--primary);
+    }
+
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      body > #pdf-template {
+        display: none !important;
+      }
+      #pdf-template, #pdf-template * {
+        visibility: visible;
+      }
+      #pdf-template {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 794px;
+        height: 1123px;
+        display: flex !important;
+        margin: 0;
+        padding: 50px 55px;
+        box-sizing: border-box;
+        background: #ffffff !important;
+        color: #000000 !important;
+      }
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
+    }
+    
+    /* Database status indicator & blink keyframe */
+    .status-indicator-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .status-dot-blink {
+      animation: status-pulsate 1.5s infinite alternate;
+    }
+    @keyframes status-pulsate {
+      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 159, 28, 0.5); }
+      70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(255, 159, 28, 0); }
+      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(255, 159, 28, 0); }
+    }
+    .status-dot-connected {
+      background: #2ec4b6 !important;
+      box-shadow: 0 0 8px #2ec4b6 !important;
+    }
+    .status-dot-offline {
+      background: #e71d36 !important;
+      box-shadow: 0 0 8px #e71d36 !important;
+    }
+    .status-dot-syncing {
+      background: #ff9f1c !important;
+      box-shadow: 0 0 8px #ff9f1c !important;
+      animation: status-pulsate 1s infinite alternate;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header Banner -->
+<header class="header-band">
+  <div class="theme-toggle-wrap">
+    <button id="themeToggleBtn" onclick="toggleTheme()" class="theme-toggle-btn" aria-label="Toggle Dark Mode">
+      <!-- Sun Icon -->
+      <svg class="sun-icon" viewBox="0 0 24 24"><path d="M12 7c-2.76 0-5 2.24-5 5s2.24 5 5 5 5-2.24 5-5-2.24-5-5-5zM2 13h2c.55 0 1-.45 1-1s-.45-1-1-1H2c-.55 0-1 .45-1 1s.45 1 1 1zm18 0h2c.55 0 1-.45 1-1s-.45-1-1-1h-2c-.55 0-1 .45-1 1s.45 1 1 1zM11 2v2c0 .55.45 1 1 1s1-.45 1-1V2c0-.55-.45-1-1-1s-1 .45-1 1zm0 18v2c0 .55.45 1 1 1s1-.45 1-1v-2c0-.55-.45-1-1-1s-1 .45-1 1zM5.99 4.58a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41L5.99 4.58zm12.37 12.37a.996.996 0 00-1.41 0 .996.996 0 000 1.41l1.06 1.06c.39.39 1.03.39 1.41 0s.39-1.03 0-1.41l-1.06-1.06zm1.06-10.96a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06zM7.05 18.01a.996.996 0 000-1.41.996.996 0 00-1.41 0l-1.06 1.06c-.39.39-.39 1.03 0 1.41s1.03.39 1.41 0l1.06-1.06z"/></svg>
+      <!-- Moon Icon -->
+      <svg class="moon-icon" viewBox="0 0 24 24"><path d="M9.37 5.51A7.35 7.35 0 009.1 7.5c0 4.08 3.32 7.4 7.4 7.4.73 0 1.43-.11 2.1-.3 1.04-.3 1.97.7 1.54 1.68-.88 2.03-2.9 3.48-5.3 3.48-3.17 0-5.75-2.58-5.75-5.75 0-2.4 1.45-4.42 3.48-5.3.98-.43 1.98.5 1.68 1.54z"/></svg>
+    </button>
+  </div>
+  
+  <div class="header-content">
+    <div class="logo-wrap">
+      <img src="data:image/png;base64,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" alt="KCYM Logo" onerror="handleLogoError(this)" />
+    </div>
+    <p class="org-label">Kerala Catholic Youth Movement</p>
+    <h1 class="site-title">KCYM <span>Pakkil</span> Unit</h1>
+    <p class="site-subtitle">Member Registration Portal</p>
+    <span class="diocese-tag">St. Theresa's Church Pakkil · Diocese of Vijayapuram</span>
+  </div>
+  <div class="gold-stripe"></div>
+</header>
+
+<!-- Welcome Info Banner -->
+<div class="welcome" id="welcomeBanner">
+  <p>✝️ Welcome to the KCYM Pakkil Unit registration portal. All youth members of St. Theresa's Church Pakkil are warmly invited to register and be part of our vibrant community. Together, let us grow in faith, service, and fellowship.</p>
+</div>
+
+<!-- Main Section -->
+<main>
+
+  <!-- Draft Restore Toast -->
+  <div class="toast" id="draftToast">
+    <span class="toast-text">📝 Unfinished registration draft found.</span>
+    <div class="toast-actions">
+      <button class="toast-btn toast-btn-restore" onclick="restoreDraft()">Restore</button>
+      <button class="toast-btn toast-btn-clear" onclick="clearDraftToast()">Dismiss</button>
+    </div>
+  </div>
+
+  <!-- Registration Form Section -->
+  <div id="registrationSection">
+    <div class="section-header">
+      <h2 class="section-heading">Register as a Member</h2>
+      <p class="section-sub">Fill in the form below. Fields marked <span style="color:var(--primary)">*</span> are required.</p>
+    </div>
+
+    <div class="form-card" id="formCard">
+      <div class="section-label">Unit Information</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="unit">Unit <span class="req">*</span></label>
+          <input type="text" id="unit" placeholder="e.g. Pakkil Unit" oninput="validateField(this, v => v.trim().length > 1)" />
+          <div class="error-msg" id="err-unit">Please enter unit name.</div>
+        </div>
+        <div class="form-group">
+          <label for="mekala">Mekala (മേഖല) <span class="req">*</span></label>
+          <input type="text" id="mekala" placeholder="e.g. Kottayam" oninput="validateField(this, v => v.trim().length > 1)" />
+          <div class="error-msg" id="err-mekala">Please enter mekala.</div>
+        </div>
+      </div>
+
+      <div class="section-label">Personal Information</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="fullName">Full Name <span class="req">*</span></label>
+          <input type="text" id="fullName" placeholder="Enter your full name" oninput="validateField(this, v => v.trim().length > 1)" />
+          <div class="error-msg" id="err-fullName">Please enter your full name.</div>
+        </div>
+        
+        <div class="form-group">
+          <label>Photo <span class="req">*</span> <span class="opt">(Passport size)</span></label>
+          <div class="photo-upload-container">
+            <div class="photo-upload-area" id="photoArea">
+              <img id="photoPreview" src="" alt="Preview" />
+              <p id="photoText">📷 Tap to upload passport photo</p>
+              <input type="file" id="photoInput" accept="image/*" onchange="handlePhotoUpload(this)" />
+            </div>
+            <div class="error-msg" id="err-photo">Please upload a profile photo.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="address">Address <span class="req">*</span></label>
+        <textarea id="address" placeholder="House name, Street, Ward, Post Office" rows="3" oninput="validateField(this, v => v.trim().length > 3)"></textarea>
+        <div class="error-msg" id="err-address">Please enter your complete address.</div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="pin">PIN Code <span class="req">*</span></label>
+          <input type="text" id="pin" placeholder="6-digit PIN" maxlength="6" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,''); validateField(this, v => /^[0-9]{6}$/.test(v.trim()))" />
+          <div class="error-msg" id="err-pin">Please enter a valid 6-digit PIN code.</div>
+        </div>
+        <div class="form-group">
+          <label for="phone">Phone Number <span class="req">*</span></label>
+          <input type="tel" id="phone" placeholder="10-digit mobile number" maxlength="10" inputmode="numeric" oninput="this.value=this.value.replace(/[^0-9]/g,''); validateField(this, v => /^[0-9]{10}$/.test(v.trim()))" />
+          <div class="error-msg" id="err-phone">Please enter a valid 10-digit phone number.</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="email">Email <span class="opt">(optional)</span></label>
+          <input type="email" id="email" placeholder="you@example.com" oninput="validateEmailField(this)" />
+          <div class="error-msg" id="err-email">Please enter a valid email address or leave empty.</div>
+        </div>
+        <div class="form-group">
+          <label for="fatherName">Father's Name <span class="req">*</span></label>
+          <input type="text" id="fatherName" placeholder="Father's full name" oninput="validateField(this, v => v.trim().length > 1)" />
+          <div class="error-msg" id="err-fatherName">Please enter father's name.</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="dob">Date of Birth <span class="req">*</span></label>
+          <input type="date" id="dob" onchange="handleDobChange(this)" />
+          <div class="error-msg" id="err-dob">Please select your date of birth.</div>
+          <div class="warning-msg" id="warn-dob">Note: KCYM is typically for youth aged 15-35.</div>
+        </div>
+        <div class="form-group">
+          <label for="age">Age</label>
+          <input type="number" id="age" placeholder="Calculated automatically" readonly style="background:rgba(0,0,0,0.03); cursor:not-allowed;" />
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="gender">Gender <span class="req">*</span></label>
+          <select id="gender" onchange="validateField(this, v => v !== '')">
+            <option value="">Select gender</option>
+            <option>Male</option>
+            <option>Female</option>
+            <option>Others</option>
+          </select>
+          <div class="error-msg" id="err-gender">Please select gender.</div>
+        </div>
+        <div class="form-group">
+          <label for="maritalStatus">Marital Status <span class="req">*</span></label>
+          <select id="maritalStatus" onchange="validateField(this, v => v !== '')">
+            <option value="">Select status</option>
+            <option>Married</option>
+            <option>Unmarried</option>
+          </select>
+          <div class="error-msg" id="err-maritalStatus">Please select marital status.</div>
+        </div>
+      </div>
+
+      <div class="form-row">
+        <div class="form-group">
+          <label for="bloodGroup">Blood Group <span class="req">*</span></label>
+          <select id="bloodGroup" onchange="validateField(this, v => v !== '')">
+            <option value="">Select blood group</option>
+            <option>A+</option><option>A−</option>
+            <option>B+</option><option>B−</option>
+            <option>AB+</option><option>AB−</option>
+            <option>O+</option><option>O−</option>
+            <option>Unknown</option>
+          </select>
+          <div class="error-msg" id="err-bloodGroup">Please select blood group.</div>
+        </div>
+        <div class="form-group">
+          <label for="education">Educational Qualification <span class="req">*</span></label>
+          <input type="text" id="education" placeholder="e.g. B.Sc, B.Tech, 12th Pass" oninput="validateField(this, v => v.trim().length > 1)" />
+          <div class="error-msg" id="err-education">Please enter qualification.</div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="occupation">Occupation <span class="req">*</span></label>
+        <select id="occupation" onchange="validateField(this, v => v !== '')">
+          <option value="">Select one</option>
+          <option>School Student</option>
+          <option>College Student</option>
+          <option>Employed – Government</option>
+          <option>Employed – Private</option>
+          <option>Self-Employed / Business</option>
+          <option>Homemaker</option>
+          <option>Unemployed</option>
+          <option>Other</option>
+        </select>
+        <div class="error-msg" id="err-occupation">Please select occupation.</div>
+      </div>
+
+      <button class="btn-submit" id="submitBtn" onclick="handleSubmit()">
+        <div class="spinner" id="btnSpinner"></div>
+        <span id="btnText">Submit & Generate PDF</span>
+      </button>
+      <p class="status-note" id="statusNote"></p>
+    </div>
+  </div>
+
+  <!-- Success Card -->
+  <div class="success-card" id="successCard">
+    <div class="success-icon">✓</div>
+    <h2>Registration Successful!</h2>
+    <p id="successMessage">Thank you for registering with <strong>KCYM Pakkil Unit</strong>. Your details have been securely recorded. You can now download your digital registration receipt.</p>
+    <div class="btn-wrap">
+      <button class="btn-pdf" onclick="generatePDF()">📄 Download Registration PDF</button>
+      <button class="btn-secondary" onclick="resetForm()">Register Another</button>
+    </div>
+  </div>
+
+  <!-- Admin Dashboard View -->
+  <div class="admin-dashboard" id="adminDashboard">
+    <div class="dashboard-header">
+      <h2 class="dashboard-title">KCYM Admin Portal</h2>
+      <div class="btn-wrap">
+        <button class="btn-secondary" onclick="exportToCSV()">📤 Export CSV</button>
+        <button class="btn-secondary" onclick="exitAdmin()">Exit Dashboard</button>
+      </div>
+    </div>
+
+    <!-- DB Connection Status -->
+    <div class="db-status-container" style="display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--text-muted); margin-bottom: 20px; margin-top: -12px;">
+      <span class="status-indicator-dot" id="dbStatusDot"></span>
+      <span id="dbStatusText">Initializing database connection...</span>
+      <button id="syncNowBtn" class="btn-secondary" style="display: none; padding: 4px 12px; font-size: 12px; border-radius: 4px; cursor: pointer;" onclick="syncPendingRegistrations()">Sync Now</button>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-val" id="stat-total">0</div>
+        <div class="stat-label">Total Members</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-male">0</div>
+        <div class="stat-label">Male</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-female">0</div>
+        <div class="stat-label">Female</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-val" id="stat-blood">0</div>
+        <div class="stat-label">Known Blood Groups</div>
+      </div>
+    </div>
+
+    <!-- Filters & Controls -->
+    <div class="controls-row">
+      <div class="search-input-wrap">
+        <input type="text" id="adminSearch" placeholder="Search by name, phone or unit..." oninput="filterAdminTable()" style="padding-left:14px;" />
+      </div>
+      <select class="filter-select" id="adminFilterBlood" onchange="filterAdminTable()">
+        <option value="">All Blood Groups</option>
+        <option>A+</option><option>A−</option>
+        <option>B+</option><option>B−</option>
+        <option>AB+</option><option>AB−</option>
+        <option>O+</option><option>O−</option>
+      </select>
+      <select class="filter-select" id="adminFilterOcc" onchange="filterAdminTable()">
+        <option value="">All Occupations</option>
+        <option>School Student</option>
+        <option>College Student</option>
+        <option>Employed</option>
+        <option>Self-Employed / Business</option>
+        <option>Unemployed / Other</option>
+      </select>
+    </div>
+
+    <!-- Table -->
+    <div class="table-container">
+      <table class="dashboard-table">
+        <thead>
+          <tr>
+            <th>Photo</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Blood</th>
+            <th>Age</th>
+            <th>Occupation</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="adminTableBody">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+    </div>
+    
+    <div id="noDataMsg" style="text-align:center; padding: 30px; display:none; color:var(--text-muted);">
+      <p>No registrations found matching the filters.</p>
+      <button class="btn-secondary" style="margin-top:12px; font-size:12px;" onclick="insertMockData()">Insert Demo Members</button>
+    </div>
+  </div>
+</main>
+
+<!-- Footer Section -->
+<footer>
+  <strong>KCYM Pakkil Unit</strong> · St. Theresa's Church Pakkil<br />
+  Diocese of Vijayapuram · Kerala Catholic Youth Movement<br />
+  <div class="footer-links">
+    <span class="footer-link" onclick="promptAdminLogin()">Admin Portal 🔒</span>
+  </div>
+  <br />
+  <span style="font-size:10.5px; opacity:0.75;">All data is stored locally and processed securely in compliance with regional privacy standards.</span><br /><br />
+  <span style="font-size:11px; opacity:0.65;">Made with ❤️ by <strong style="color:var(--primary);">Job Albert</strong></span>
+</footer>
+
+<!-- ---------------------------------------------------- -->
+<!-- OFF-SCREEN BILINGUAL PDF TEMPLATE WITH INLINE STYLES -->
+<div id="pdf-template" style="display: none; width: 794px; height: 1123px; padding: 50px 55px; background: #ffffff; color: #000000; font-family: 'Inter', 'Manjari', sans-serif; box-sizing: border-box; flex-direction: column; justify-content: space-between;">
+  <div>
+    <!-- PDF Header -->
+    <div style="position: relative; text-align: center; margin-bottom: 25px; min-height: 60px; height: auto; display: flex; flex-direction: column; justify-content: center;">
+      <img id="pdf-logo" src="data:image/png;base64,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" alt="KCYM Logo" style="position: absolute; left: 0; top: 0; width: 60px; height: 60px; object-fit: contain;" onerror="this.style.display='none'" />
+      <div style="font-size: 21px; font-weight: 900; font-family: 'Manjari', sans-serif; margin: 0 auto; letter-spacing: 0.2px;">കെ.സി.വൈ.എം. വിജയപുരം രൂപത</div>
+      <div style="font-size: 16.5px; font-weight: 900; font-family: 'Manjari', sans-serif; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 5px; margin-top: 6px;">അംഗത്വ രജിസ്ട്രേഷൻ ഫോറം</div>
+    </div>
+
+    <!-- Unit / Mekala info -->
+    <div style="margin-left: 0px; margin-bottom: 25px; font-family: 'Manjari', sans-serif; font-size: 14.5px;">
+      <div style="margin-bottom: 8px; display: flex; align-items: flex-end;">
+        <span style="font-weight: 900; white-space: nowrap;">യൂണിറ്റ്:</span>
+        <span id="pdf-val-unit" style="border-bottom: 1.2px dotted #000; display: inline-block; min-width: 180px; margin-left: 5px; padding-left: 5px; min-height: 18px; font-weight: 500;"></span>
+      </div>
+      <div style="display: flex; align-items: flex-end;">
+        <span style="font-weight: 900; white-space: nowrap;">മേഖല:</span>
+        <span id="pdf-val-mekala" style="border-bottom: 1.2px dotted #000; display: inline-block; min-width: 180px; margin-left: 5px; padding-left: 5px; min-height: 18px; font-weight: 500;"></span>
+      </div>
+    </div>
+
+    <!-- Two-Column Personal Details Section -->
+    <div style="display: flex; justify-content: space-between; margin-bottom: 15px;">
+      <!-- Left column: fields (width: 530px) -->
+      <div style="width: 530px; display: flex; flex-direction: column;">
+        
+        <!-- Name -->
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+          <span style="font-weight: 900; white-space: nowrap;">Name:</span>
+          <span id="pdf-val-fullName" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500;"></span>
+        </div>
+        
+        <!-- Address Line 1 -->
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+          <span style="font-weight: 900; white-space: nowrap;">Address:</span>
+          <span id="pdf-val-address1" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500;"></span>
+        </div>
+        
+        <!-- Address Line 2 -->
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+          <span id="pdf-val-address2" style="flex-grow: 1; border-bottom: 1.2px dotted #000; min-height: 20px; font-weight: 500; padding-left: 8px;"></span>
+        </div>
+        
+        <!-- Address Line 3: Pin -->
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+          <span style="flex-grow: 0.65; border-bottom: 1.2px dotted #000; min-height: 20px;"></span>
+          <span style="font-weight: 900; padding: 0 10px; white-space: nowrap;">Pin</span>
+          <span id="pdf-val-pin" style="flex-grow: 0.35; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500; text-align: left;"></span>
+        </div>
+        
+        <!-- Ph -->
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+          <span style="font-weight: 900; white-space: nowrap;">Ph:</span>
+          <span id="pdf-val-phone" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500;"></span>
+        </div>
+        
+        <!-- E-mail -->
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+          <span style="font-weight: 900; white-space: nowrap;">E-mail:</span>
+          <span id="pdf-val-email" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500;"></span>
+        </div>
+        
+        <!-- Father's Name -->
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+          <span style="font-weight: 900; white-space: nowrap;">Father's Name:</span>
+          <span id="pdf-val-fatherName" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500;"></span>
+        </div>
+        
+        <!-- Date of Birth -->
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+          <span style="font-weight: 900; white-space: nowrap;">Date of Birth:</span>
+          <span id="pdf-val-dob" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500;"></span>
+        </div>
+        
+      </div>
+      
+      <!-- Right column: Photo Box (width: 140px) -->
+      <div style="width: 140px; display: flex; justify-content: flex-end; align-items: flex-start; padding-top: 5px;">
+        <div id="pdf-photo-container" style="width: 130px; height: 165px; border: 1.5px solid #000000; display: flex; align-items: center; justify-content: center; background: #ffffff; overflow: hidden; position: relative;">
+          <img id="pdf-photo" src="" style="width: 100%; height: 100%; object-fit: cover; display: none;" />
+          <span id="pdf-photo-placeholder" style="font-size: 14px; font-weight: bold; color: #000000; font-family: 'Inter', sans-serif;">Photo</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Gender -->
+    <div style="display: flex; align-items: center; margin-bottom: 14px; font-size: 14.5px;">
+      <div style="width: 140px; font-weight: 900;">Gender</div>
+      <div style="margin-right: 15px; font-weight: 900;">:</div>
+      <div style="display: flex; align-items: center; margin-right: 30px;">
+        <div id="pdf-gender-male-box" style="width: 15px; height: 15px; border: 1.5px solid #000; margin-right: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; line-height: 1; font-family: 'Inter', sans-serif;"></div>
+        <span>Male</span>
+      </div>
+      <div style="display: flex; align-items: center; margin-right: 30px;">
+        <div id="pdf-gender-female-box" style="width: 15px; height: 15px; border: 1.5px solid #000; margin-right: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; line-height: 1; font-family: 'Inter', sans-serif;"></div>
+        <span>Female</span>
+      </div>
+      <div style="display: flex; align-items: center;">
+        <div id="pdf-gender-others-box" style="width: 15px; height: 15px; border: 1.5px solid #000; margin-right: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; line-height: 1; font-family: 'Inter', sans-serif;"></div>
+        <span>Others</span>
+      </div>
+    </div>
+
+    <!-- Marital Status -->
+    <div style="display: flex; align-items: center; margin-bottom: 14px; font-size: 14.5px;">
+      <div style="width: 140px; font-weight: 900;">Marital Status</div>
+      <div style="margin-right: 15px; font-weight: 900;">:</div>
+      <div style="display: flex; align-items: center; margin-right: 30px;">
+        <div id="pdf-marital-married-box" style="width: 15px; height: 15px; border: 1.5px solid #000; margin-right: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; line-height: 1; font-family: 'Inter', sans-serif;"></div>
+        <span>Married</span>
+      </div>
+      <div style="display: flex; align-items: center;">
+        <div id="pdf-marital-unmarried-box" style="width: 15px; height: 15px; border: 1.5px solid #000; margin-right: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; line-height: 1; font-family: 'Inter', sans-serif;"></div>
+        <span>Unmarried</span>
+      </div>
+    </div>
+
+    <!-- Educational Qualification -->
+    <div style="display: flex; align-items: flex-end; margin-bottom: 14px; font-size: 14.5px;">
+      <span style="font-weight: 900; white-space: nowrap; width: 175px;">Educational Qualification</span>
+      <span style="margin-right: 15px; font-weight: 900;">:</span>
+      <span id="pdf-val-education" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500;"></span>
+    </div>
+
+    <!-- Occupation -->
+    <div style="display: flex; align-items: flex-end; margin-bottom: 30px; font-size: 14.5px;">
+      <span style="font-weight: 900; white-space: nowrap; width: 175px;">Occupation</span>
+      <span style="margin-right: 15px; font-weight: 900;">:</span>
+      <span id="pdf-val-occupation" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 20px; font-weight: 500;"></span>
+    </div>
+
+    <!-- Pledge -->
+    <div style="text-align: center; margin-bottom: 10px;">
+      <span style="font-size: 16.5px; font-weight: 900; font-family: 'Manjari', sans-serif; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 5px;">പ്രതിജ്ഞ</span>
+    </div>
+
+    <div style="font-size: 14px; line-height: 1.9; text-align: justify; font-family: 'Manjari', sans-serif; margin-bottom: 25px;">
+      ഞാൻ <span id="pdf-val-pledgeName" style="border-bottom: 1.2px dotted #000; display: inline-block; min-width: 250px; text-align: center; font-weight: 900; font-family: 'Manjari', sans-serif; padding: 0 5px;"></span> മുകളിൽ പറഞ്ഞിരിക്കുന്ന വിവരങ്ങളെല്ലാം സത്യമാണെന്നും കെ.സി.വൈ.എം. വിജയപുരം രൂപത ഭരണഘടന അനുശാസിക്കുന്ന എല്ലാ നിയമങ്ങളും അനുസരിച്ചുകൊള്ളാമെന്നും ഇതിനാൽ പ്രതിജ്ഞ ചെയ്യുന്നു.
+    </div>
+
+    <!-- Signatures -->
+    <div style="display: flex; justify-content: space-between; margin-bottom: 20px; font-size: 14px; font-family: 'Manjari', sans-serif;">
+      <div style="width: 45%;">
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px;">
+          <span style="font-weight: 900; white-space: nowrap;">സ്ഥലം:</span>
+          <span style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 18px; font-weight: 500;">Pakkil</span>
+        </div>
+        <div style="display: flex; align-items: flex-end;">
+          <span style="font-weight: 900; white-space: nowrap;">തീയതി:</span>
+          <span id="pdf-val-sigDate" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 18px; font-weight: 500;"></span>
+        </div>
+      </div>
+      <div style="width: 45%;">
+        <div style="display: flex; align-items: flex-end; margin-bottom: 14px;">
+          <span style="font-weight: 900; white-space: nowrap;">പേര്:</span>
+          <span id="pdf-val-sigName" style="flex-grow: 1; border-bottom: 1.2px dotted #000; padding-left: 8px; min-height: 18px; font-weight: 900;"></span>
+        </div>
+        <div style="display: flex; align-items: flex-end;">
+          <span style="font-weight: 900; white-space: nowrap;">ഒപ്പ്:</span>
+          <span style="flex-grow: 1; border-bottom: 1.2px dotted #000; min-height: 18px;"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <hr style="border: none; border-top: 1.5px solid #000000; margin: 15px 0 15px 0;" />
+
+    <!-- Office Section -->
+    <div style="text-align: center; margin-bottom: 15px;">
+      <span style="font-size: 16px; font-weight: 900; font-family: 'Manjari', sans-serif; text-decoration: underline; text-decoration-thickness: 1.5px; text-underline-offset: 5px;">ഓഫീസ് ആവശ്യങ്ങൾക്ക്</span>
+    </div>
+
+    <div style="display: flex; align-items: flex-end; margin-bottom: 40px; font-size: 14px; font-family: 'Manjari', sans-serif; max-width: 350px;">
+      <span style="font-weight: 900; white-space: nowrap;">പാസ്സാക്കിയ തീയതി:</span>
+      <span style="flex-grow: 1; border-bottom: 1.2px dotted #000; min-height: 18px;"></span>
+    </div>
+
+    <div style="display: flex; justify-content: space-between; font-size: 14px; font-weight: 900; font-family: 'Manjari', sans-serif; padding: 0 10px; margin-bottom: 10px;">
+      <span>പ്രസിഡന്റ്</span>
+      <span>സെക്രട്ടറി</span>
+      <span>ഡയറക്ടർ</span>
+      <span>സീൽ</span>
+    </div>
+  </div>
+</div>
+<!-- ---------------------------------------------------- -->
+<!-- CUSTOM MODALS (LOGIN, DETAILS) -->
+<!-- ---------------------------------------------------- -->
+
+<!-- Password Dialog Modal -->
+<div class="modal-overlay" id="adminLoginModal">
+  <div class="modal-card">
+    <button class="modal-close" onclick="closeAdminModal('adminLoginModal')">×</button>
+    <h3 class="modal-title">Admin Authentication</h3>
+    <div class="modal-body">
+      <p style="font-size: 13.5px; color: var(--text-muted); margin-bottom: 15px;">Please enter the administrator access password.</p>
+      <label for="adminPass" style="font-size:11px;">Password</label>
+      <input type="password" id="adminPass" placeholder="••••••••" style="letter-spacing:2px;" onkeydown="if(event.key==='Enter') submitAdminLogin()" />
+      <div class="error-msg" id="err-adminPass" style="display:none;">Invalid credentials. Please try again.</div>
+    </div>
+    <div class="btn-wrap" style="justify-content: flex-end;">
+      <button class="btn-secondary" style="padding: 8px 18px;" onclick="closeAdminModal('adminLoginModal')">Cancel</button>
+      <button class="btn-pdf" style="padding: 9px 22px;" onclick="submitAdminLogin()">Verify</button>
+    </div>
+  </div>
+</div>
+
+<!-- Registration Details Modal -->
+<div class="modal-overlay" id="memberDetailsModal">
+  <div class="modal-card" style="max-width: 550px;">
+    <button class="modal-close" onclick="closeAdminModal('memberDetailsModal')">×</button>
+    <h3 class="modal-title" id="detailsModalTitle">Member Details</h3>
+    
+    <div class="modal-body" style="display:flex; gap: 20px; align-items: flex-start; margin-top: 15px;">
+      <img id="detailsPhoto" src="" alt="Photo" style="width:100px; height:120px; object-fit:cover; border-radius: 8px; border:1px solid var(--border); box-shadow: var(--shadow-sm);" />
+      
+      <div style="flex-grow:1;">
+        <div class="modal-grid-details" id="detailsGrid">
+          <!-- Dynamic details filled by JS -->
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-wrap" style="justify-content: flex-end;">
+      <button class="btn-secondary" style="padding: 8px 18px;" onclick="closeAdminModal('memberDetailsModal')">Close</button>
+      <button class="btn-pdf" style="padding: 9px 22px;" id="detailsDownloadBtn">📄 Download PDF</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxYYAJNg282JDbnAx4J5_FhNgdb8uJQUhC42YX1LVrJ_GFFueajRxguwAx6lGI5O1JOIQ/exec";
+  
+  // Application State
+  let activeTheme = 'light';
+  let photoDataURL = null;
+  let activeRegistrationData = {}; // For the success screen PDF download
+  let draftSaveTimer = null;
+  let cachedRegistrations = [];
+  let pendingSync = [];
+
+  // Load from local storage initially as fallback
+  try {
+    const saved = localStorage.getItem('kcym_registrations');
+    if (saved) cachedRegistrations = JSON.parse(saved);
+  } catch (e) {
+    console.error("Failed to parse cached registrations:", e);
+  }
+
+  try {
+    const pendingSaved = localStorage.getItem('kcym_pending_sync');
+    if (pendingSaved) pendingSync = JSON.parse(pendingSaved);
+  } catch (e) {
+    console.error("Failed to parse pending sync registrations:", e);
+  }
+
+  // Update visual connection status on the admin dashboard
+  function updateSyncStatus(status) {
+    const dot = document.getElementById("dbStatusDot");
+    const txt = document.getElementById("dbStatusText");
+    const btn = document.getElementById("syncNowBtn");
+    
+    if (!dot || !txt) return;
+    
+    // Clear status classes
+    dot.className = "status-indicator-dot";
+    
+    if (status === 'connected') {
+      dot.classList.add("status-dot-connected");
+      txt.textContent = "Database Connected";
+      txt.style.color = "var(--text-muted)";
+      if (btn) btn.style.display = "none";
+    } else if (status === 'offline') {
+      dot.classList.add("status-dot-offline");
+      txt.innerHTML = `Offline <span style="font-size:12px; color:var(--primary); font-weight:600;">(${pendingSync.length} pending sync)</span>`;
+      if (btn && pendingSync.length > 0) {
+        btn.style.display = "inline-block";
+        btn.textContent = `Sync Now (${pendingSync.length})`;
+      } else if (btn) {
+        btn.style.display = "none";
+      }
+    } else if (status === 'syncing') {
+      dot.classList.add("status-dot-syncing");
+      txt.textContent = "Syncing with cloud database...";
+      txt.style.color = "var(--text-muted)";
+      if (btn) btn.style.display = "none";
+    }
+  }
+
+  // Sync registrations that were saved locally while offline
+  async function syncPendingRegistrations() {
+    if (pendingSync.length === 0) return;
+    
+    console.log(`Attempting to sync ${pendingSync.length} pending registration(s)...`);
+    updateSyncStatus('syncing');
+
+    const toSync = [...pendingSync];
+    let syncCount = 0;
+
+    for (let i = 0; i < toSync.length; i++) {
+      const reg = toSync[i];
+      let success = false;
+      try {
+        const response = await fetch(SCRIPT_URL, {
+          method: "POST",
+          mode: "cors",
+          headers: {
+            "Content-Type": "text/plain"
+          },
+          body: JSON.stringify(reg)
+        });
+        
+        if (response.ok) {
+          const resJson = await response.json();
+          if (resJson && resJson.status === "success") {
+            success = true;
+          }
+        }
+      } catch (e) {
+        console.warn("POST failed during sync, trying GET fallback:", e);
+        
+        // GET fallback (without photo)
+        const params = new URLSearchParams();
+        Object.keys(reg).forEach(k => {
+          if (k !== 'photo') params.append(k, reg[k]);
+        });
+        
+        try {
+          const getResponse = await fetch(SCRIPT_URL + "?" + params.toString(), {
+            method: "GET",
+            mode: "cors"
+          });
+          if (getResponse.ok) {
+            const getJson = await getResponse.json();
+            if (getJson && getJson.status === "success") {
+              success = true;
+            }
+          }
+        } catch (err) {
+          console.error("GET fallback failed during sync:", err);
+        }
+      }
+
+      if (success) {
+        syncCount++;
+        // Remove from pendingSync array
+        const index = pendingSync.findIndex(p => p.id === reg.id);
+        if (index > -1) {
+          pendingSync.splice(index, 1);
+        }
+        localStorage.setItem('kcym_pending_sync', JSON.stringify(pendingSync));
+      } else {
+        console.warn("Sync failed for a registration. Aborting batch sync.");
+        break;
+      }
+    }
+
+    if (syncCount > 0) {
+      console.log(`Successfully synced ${syncCount} registration(s).`);
+      // Update UI in admin if it's active
+      if (document.getElementById("adminDashboard").style.display === "block") {
+        await fetchRegistrations();
+        renderAdminTable();
+      }
+    }
+
+    // Update connection status
+    if (pendingSync.length === 0) {
+      updateSyncStatus('connected');
+    } else {
+      updateSyncStatus('offline');
+    }
+  }
+
+  // Fetch registrations from Google Apps Script
+  async function fetchRegistrations() {
+    try {
+      updateSyncStatus('syncing');
+      const response = await fetch(SCRIPT_URL + "?action=read", {
+        method: "GET",
+        mode: "cors"
+      });
+      if (!response.ok) throw new Error("Failed to fetch data from Google Sheet");
+      const data = await response.json();
+      if (Array.isArray(data)) {
+        cachedRegistrations = data;
+        localStorage.setItem('kcym_registrations', JSON.stringify(data));
+        // If there are pending syncs, trigger background sync
+        if (pendingSync.length > 0) {
+          syncPendingRegistrations();
+        } else {
+          updateSyncStatus('connected');
+        }
+      } else {
+        throw new Error("Invalid response format");
+      }
+      return cachedRegistrations;
+    } catch (error) {
+      console.error("Error fetching registrations:", error);
+      updateSyncStatus('offline');
+      // Fallback to local storage (already populated in cachedRegistrations)
+      return cachedRegistrations;
+    }
+  }
+
+  // ----------------------------------------------------
+  // INITIALIZATION
+  // ----------------------------------------------------
+  window.addEventListener('DOMContentLoaded', () => {
+    // 1. Theme Check
+    const savedTheme = localStorage.getItem('kcym_theme');
+    if (savedTheme) {
+      setTheme(savedTheme);
+    } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      setTheme('dark');
+    }
+
+    // 2. Draft Check
+    checkDraft();
+
+    // 3. Attach change/input listeners for auto-save
+    const formInputs = document.querySelectorAll('#formCard input, #formCard select, #formCard textarea');
+    formInputs.forEach(input => {
+      input.addEventListener('input', scheduleDraftSave);
+      input.addEventListener('change', scheduleDraftSave);
+    });
+
+    // 4. Debug/Preview Mode Check
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('preview')) {
+      const welcome = document.getElementById("welcomeBanner");
+      if (welcome) welcome.style.display = "none";
+      const reg = document.getElementById("registrationSection");
+      if (reg) reg.style.display = "none";
+      const success = document.getElementById("successCard");
+      if (success) success.style.display = "none";
+      const admin = document.getElementById("adminDashboard");
+      if (admin) admin.style.display = "none";
+      
+      // Make template visible on the page
+      const el = document.getElementById("pdf-template");
+      if (el) {
+        el.style.display = "flex";
+        el.style.position = "relative";
+        el.style.left = "0";
+        el.style.top = "0";
+        el.style.margin = "40px auto";
+        el.style.boxShadow = "0 10px 25px rgba(0,0,0,0.15)";
+        document.body.appendChild(el);
+      }
+      
+      // Populate with mock details matching the photo requirements
+      const mockData = {
+        unit: "Pakkil Unit",
+        mekala: "Kottayam",
+        fullName: "Job Albert",
+        address: "Puthenpurayil House, Pakkil P.O., Kottayam",
+        pin: "686012",
+        phone: "9876543210",
+        email: "jobalbert@gmail.com",
+        fatherName: "Albert Joseph",
+        dob: "2000-05-12",
+        gender: "Male",
+        maritalStatus: "Unmarried",
+        education: "B.Tech Computer Science",
+        occupation: "College Student"
+      };
+      
+      // Render without downloading
+      generatePDF(mockData, false);
+    }
+
+    // 5. Auto-sync check
+    if (pendingSync.length > 0) {
+      setTimeout(syncPendingRegistrations, 2000);
+    }
+  });
+
+  // ----------------------------------------------------
+  // THEME MANAGEMENT
+  // ----------------------------------------------------
+  function toggleTheme() {
+    const nextTheme = activeTheme === 'light' ? 'dark' : 'light';
+    setTheme(nextTheme);
+  }
+
+  function setTheme(theme) {
+    activeTheme = theme;
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('kcym_theme', theme);
+  }
+
+  function handleLogoError(img) {
+    img.style.border = 'none';
+    img.parentElement.style.background = 'linear-gradient(135deg, var(--secondary), #E0B000)';
+    img.style.display = 'none';
+  }
+
+  // ----------------------------------------------------
+  // IMAGE COMPRESSION & PHOTO HANDLING
+  // ----------------------------------------------------
+  function handlePhotoUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = function(e) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const maxW = 240;
+        const maxH = 300;
+        let width = img.width;
+        let height = img.height;
+
+        if (width / height > maxW / maxH) {
+          width = maxW;
+          height = Math.round((img.height * maxW) / img.width);
+        } else {
+          height = maxH;
+          width = Math.round((img.width * maxH) / img.height);
+        }
+
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        photoDataURL = canvas.toDataURL('image/jpeg', 0.82);
+        
+        const preview = document.getElementById("photoPreview");
+        preview.src = photoDataURL;
+        preview.style.display = "block";
+        document.getElementById("photoText").style.display = "none";
+        
+        document.getElementById("err-photo").style.display = "none";
+        document.getElementById("photoArea").classList.remove("invalid");
+        document.getElementById("photoArea").classList.add("valid");
+
+        saveDraft();
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ----------------------------------------------------
+  // FORM INTERACTIVE VALIDATIONS
+  // ----------------------------------------------------
+  function validateField(element, checkFn) {
+    const errEl = document.getElementById("err-" + element.id);
+    const isValid = checkFn(element.value);
+
+    if (isValid) {
+      element.classList.remove("invalid");
+      element.classList.add("valid");
+      if (errEl) errEl.style.display = "none";
+    } else {
+      element.classList.remove("valid");
+      element.classList.add("invalid");
+      if (errEl) errEl.style.display = "block";
+    }
+    return isValid;
+  }
+
+  function validateEmailField(element) {
+    const value = element.value.trim();
+    if (value === "") {
+      element.classList.remove("invalid");
+      element.classList.remove("valid");
+      document.getElementById("err-email").style.display = "none";
+      return true;
+    }
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return validateField(element, v => emailRegex.test(v.trim()));
+  }
+
+  function handleDobChange(input) {
+    const dobValue = input.value;
+    const errEl = document.getElementById("err-dob");
+    const warnEl = document.getElementById("warn-dob");
+    
+    if (!dobValue) {
+      input.classList.remove("valid");
+      input.classList.add("invalid");
+      errEl.style.display = "block";
+      warnEl.style.display = "none";
+      document.getElementById("age").value = "";
+      return;
+    }
+
+    input.classList.remove("invalid");
+    input.classList.add("valid");
+    errEl.style.display = "none";
+
+    const dob = new Date(dobValue);
+    const today = new Date();
+    let age = today.getFullYear() - dob.getFullYear();
+    const m = today.getMonth() - dob.getMonth();
+    
+    if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+      age--;
+    }
+
+    if (age >= 0 && age < 120) {
+      document.getElementById("age").value = age;
+      if (age < 15 || age > 35) {
+        warnEl.style.display = "block";
+      } else {
+        warnEl.style.display = "none";
+      }
+    } else {
+      document.getElementById("age").value = "";
+      input.classList.add("invalid");
+      errEl.textContent = "Please select a valid date.";
+      errEl.style.display = "block";
+      warnEl.style.display = "none";
+    }
+  }
+
+  function validateForm() {
+    let isValid = true;
+
+    const rules = [
+      { id: "unit",          fn: v => v.trim().length > 1 },
+      { id: "mekala",        fn: v => v.trim().length > 1 },
+      { id: "fullName",      fn: v => v.trim().length > 1 },
+      { id: "address",       fn: v => v.trim().length > 3 },
+      { id: "pin",           fn: v => /^[0-9]{6}$/.test(v.trim()) },
+      { id: "phone",         fn: v => /^[0-9]{10}$/.test(v.trim()) },
+      { id: "fatherName",    fn: v => v.trim().length > 1 },
+      { id: "dob",           fn: v => v !== "" },
+      { id: "gender",        fn: v => v !== "" },
+      { id: "maritalStatus", fn: v => v !== "" },
+      { id: "bloodGroup",    fn: v => v !== "" },
+      { id: "education",     fn: v => v.trim().length > 1 },
+      { id: "occupation",    fn: v => v !== "" },
+    ];
+
+    rules.forEach(rule => {
+      const el = document.getElementById(rule.id);
+      if (rule.id === "dob") {
+        handleDobChange(el);
+        if (el.classList.contains("invalid")) isValid = false;
+      } else {
+        const check = validateField(el, rule.fn);
+        if (!check) isValid = false;
+      }
+    });
+
+    const emailEl = document.getElementById("email");
+    if (!validateEmailField(emailEl)) isValid = false;
+
+    const photoArea = document.getElementById("photoArea");
+    if (!photoDataURL) {
+      // Photo is optional: do not mark invalid or block submission
+      photoArea.classList.remove("invalid");
+      document.getElementById("err-photo").style.display = "none";
+    } else {
+      photoArea.classList.remove("invalid");
+      photoArea.classList.add("valid");
+      document.getElementById("err-photo").style.display = "none";
+    }
+
+    if (!isValid) {
+      const card = document.getElementById("formCard");
+      card.classList.add("card-shake");
+      setTimeout(() => card.classList.remove("card-shake"), 450);
+    }
+
+    return isValid;
+  }
+
+  // ----------------------------------------------------
+  // LOCAL STORAGE DRAFT MANAGEMENT
+  // ----------------------------------------------------
+  function scheduleDraftSave() {
+    clearTimeout(draftSaveTimer);
+    draftSaveTimer = setTimeout(saveDraft, 1000);
+  }
+
+  function saveDraft() {
+    const draftData = {
+      unit:          document.getElementById("unit").value,
+      mekala:        document.getElementById("mekala").value,
+      fullName:      document.getElementById("fullName").value,
+      address:       document.getElementById("address").value,
+      pin:           document.getElementById("pin").value,
+      phone:         document.getElementById("phone").value,
+      email:         document.getElementById("email").value,
+      fatherName:    document.getElementById("fatherName").value,
+      dob:           document.getElementById("dob").value,
+      age:           document.getElementById("age").value,
+      gender:        document.getElementById("gender").value,
+      maritalStatus: document.getElementById("maritalStatus").value,
+      bloodGroup:    document.getElementById("bloodGroup").value,
+      education:     document.getElementById("education").value,
+      occupation:    document.getElementById("occupation").value,
+      photo:         photoDataURL
+    };
+    
+    if (draftData.fullName.trim() || draftData.phone.trim()) {
+      localStorage.setItem('kcym_registration_draft', JSON.stringify(draftData));
+    }
+  }
+
+  function checkDraft() {
+    const savedDraft = localStorage.getItem('kcym_registration_draft');
+    if (savedDraft) {
+      document.getElementById("draftToast").style.display = "flex";
+    }
+  }
+
+  function restoreDraft() {
+    const savedDraft = localStorage.getItem('kcym_registration_draft');
+    if (!savedDraft) return;
+
+    const draft = JSON.parse(savedDraft);
+    const fields = ["unit", "mekala", "fullName", "address", "pin", "phone", "email", "fatherName", "dob", "age", "gender", "maritalStatus", "bloodGroup", "education", "occupation"];
+
+    fields.forEach(f => {
+      const el = document.getElementById(f);
+      if (el && draft[f] !== undefined) {
+        el.value = draft[f];
+        if (f !== 'age' && f !== 'email') el.classList.add("valid");
+      }
+    });
+
+    const emailEl = document.getElementById("email");
+    if (emailEl.value) validateEmailField(emailEl);
+    
+    const dobEl = document.getElementById("dob");
+    if (dobEl.value) handleDobChange(dobEl);
+
+    if (draft.photo) {
+      photoDataURL = draft.photo;
+      const preview = document.getElementById("photoPreview");
+      preview.src = photoDataURL;
+      preview.style.display = "block";
+      document.getElementById("photoText").style.display = "none";
+      document.getElementById("photoArea").classList.add("valid");
+    }
+
+    clearDraftToast();
+  }
+
+  function clearDraftToast() {
+    document.getElementById("draftToast").style.display = "none";
+  }
+
+  function deleteDraft() {
+    localStorage.removeItem('kcym_registration_draft');
+  }
+
+  function resetForm() {
+    // Hide success card, show form section and welcome banner
+    document.getElementById("successCard").style.display = "none";
+    document.getElementById("registrationSection").style.display = "block";
+    document.getElementById("welcomeBanner").style.display = "block";
+
+    // Reset application state variables
+    photoDataURL = null;
+    activeRegistrationData = {};
+
+    // Reset all form inputs and validation classes
+    const formInputs = document.querySelectorAll('#formCard input, #formCard select, #formCard textarea');
+    formInputs.forEach(input => {
+      input.value = "";
+      input.classList.remove("valid", "invalid");
+    });
+
+    // Reset photo upload preview and text
+    const preview = document.getElementById("photoPreview");
+    if (preview) {
+      preview.src = "";
+      preview.style.display = "none";
+    }
+    const photoText = document.getElementById("photoText");
+    if (photoText) {
+      photoText.style.display = "block";
+    }
+    const photoArea = document.getElementById("photoArea");
+    if (photoArea) {
+      photoArea.classList.remove("valid", "invalid");
+    }
+
+    // Hide all validation error and warning messages
+    const errMessages = document.querySelectorAll(".error-msg, .warning-msg");
+    errMessages.forEach(msg => {
+      msg.style.display = "none";
+    });
+
+    // Reset submit button state
+    const btn = document.getElementById("submitBtn");
+    const spinner = document.getElementById("btnSpinner");
+    const text = document.getElementById("btnText");
+    const note = document.getElementById("statusNote");
+    if (btn) btn.disabled = false;
+    if (spinner) spinner.style.display = "none";
+    if (text) text.textContent = "Submit & Generate PDF";
+    if (note) note.textContent = "";
+
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  // ----------------------------------------------------
+  // SUBMISSION
+  // ----------------------------------------------------
+  async function handleSubmit() {
+    if (!validateForm()) return;
+
+    const btn = document.getElementById("submitBtn");
+    const spinner = document.getElementById("btnSpinner");
+    const text = document.getElementById("btnText");
+    const note = document.getElementById("statusNote");
+
+    btn.disabled = true;
+    spinner.style.display = "block";
+    text.textContent = "Submitting Data...";
+    note.textContent = "Connecting to the server. Please do not close the browser.";
+
+    activeRegistrationData = {
+      id:            "REG-" + Date.now().toString().slice(-6),
+      timestamp:     new Date().toLocaleString("en-IN", {timeZone:"Asia/Kolkata"}),
+      unit:          document.getElementById("unit").value.trim(),
+      mekala:        document.getElementById("mekala").value.trim(),
+      fullName:      document.getElementById("fullName").value.trim(),
+      address:       document.getElementById("address").value.trim(),
+      pin:           document.getElementById("pin").value.trim(),
+      phone:         document.getElementById("phone").value.trim(),
+      email:         document.getElementById("email").value.trim() || "-",
+      fatherName:    document.getElementById("fatherName").value.trim(),
+      dob:           document.getElementById("dob").value,
+      age:           document.getElementById("age").value,
+      gender:        document.getElementById("gender").value,
+      maritalStatus: document.getElementById("maritalStatus").value,
+      bloodGroup:    document.getElementById("bloodGroup").value,
+      education:     document.getElementById("education").value.trim(),
+      occupation:    document.getElementById("occupation").value,
+      photo:         photoDataURL
+    };
+
+    // Google Sheet Submission
+    // First, try sending everything via POST (including photo and id)
+    let syncSuccess = false;
+    try {
+      const response = await fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "cors",
+        headers: {
+          "Content-Type": "text/plain"
+        },
+        body: JSON.stringify(activeRegistrationData)
+      });
+      if (response.ok) {
+        const resJson = await response.json();
+        if (resJson && resJson.status === "success") {
+          syncSuccess = true;
+        }
+      }
+    } catch (e) {
+      console.warn("Google Sheet POST sync failed, trying GET fallback.", e);
+    }
+
+    // If POST failed, fallback to GET (without photo)
+    if (!syncSuccess) {
+      const params = new URLSearchParams();
+      Object.keys(activeRegistrationData).forEach(k => {
+        if (k !== 'photo') {
+          params.append(k, activeRegistrationData[k]);
+        }
+      });
+
+      try {
+        const response = await fetch(SCRIPT_URL + "?" + params.toString(), { 
+          method: "GET", 
+          mode: "cors" 
+        });
+        if (response.ok) {
+          const resJson = await response.json();
+          if (resJson && resJson.status === "success") {
+            syncSuccess = true;
+          }
+        }
+      } catch(e) {
+        console.error("Google Sheet GET fallback sync failed.", e);
+      }
+    }
+
+    // Save locally
+    cachedRegistrations.push(activeRegistrationData);
+    localStorage.setItem('kcym_registrations', JSON.stringify(cachedRegistrations));
+
+    if (syncSuccess) {
+      document.getElementById("successMessage").innerHTML = "Thank you for registering with <strong>KCYM Pakkil Unit</strong>. Your details have been securely recorded in the cloud database. You can now download your digital registration receipt.";
+    } else {
+      pendingSync.push(activeRegistrationData);
+      localStorage.setItem('kcym_pending_sync', JSON.stringify(pendingSync));
+      document.getElementById("successMessage").innerHTML = "<strong style='color:var(--primary);'>Offline Registration Saved!</strong> Your registration was saved locally on this phone because the central database is offline. It will automatically sync next time you have a connection. You can download your receipt below.";
+    }
+
+    deleteDraft();
+
+    document.getElementById("registrationSection").style.display = "none";
+    document.getElementById("welcomeBanner").style.display = "none";
+    document.getElementById("successCard").style.display = "block";
+    
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    
+    btn.disabled = false;
+    spinner.style.display = "none";
+    text.textContent = "Submit & Generate PDF";
+    note.textContent = "";
+
+    triggerConfetti();
+  }
+
+  function triggerConfetti() {
+    const duration = 2.5 * 1000;
+    const animationEnd = Date.now() + duration;
+    const defaults = { startVelocity: 25, spread: 360, ticks: 50, zIndex: 1000 };
+
+    function randomInRange(min, max) {
+      return Math.random() * (max - min) + min;
+    }
+
+    const interval = setInterval(function() {
+      const timeLeft = animationEnd - Date.now();
+      if (timeLeft <= 0) return clearInterval(interval);
+
+      const particleCount = 40 * (timeLeft / duration);
+      confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+      confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+    }, 250);
+  }
+
+  // ----------------------------------------------------
+  // PDF GENERATION (HTML-TO-PDF)
+  // ----------------------------------------------------
+  function generatePDF(customData, shouldSave = true) {
+    const data = customData || activeRegistrationData;
+    if (!data.fullName) return;
+
+    let element;
+    let container;
+    let isClone = false;
+
+    if (shouldSave) {
+      // Create a wrapper to hide the clone from view without using display:none or off-screen positioning
+      container = document.createElement("div");
+      container.style.position = "fixed";
+      container.style.left = "0px";
+      container.style.top = "0px";
+      container.style.width = "794px";
+      container.style.height = "1123px";
+      container.style.overflow = "hidden";
+      container.style.opacity = "0.01";
+      container.style.zIndex = "-99999";
+
+      const originalTemplate = document.getElementById("pdf-template");
+      element = originalTemplate.cloneNode(true);
+      element.style.display = "flex";
+      element.style.position = "relative";
+      
+      container.appendChild(element);
+      document.body.appendChild(container);
+      isClone = true;
+    } else {
+      element = document.getElementById("pdf-template");
+    }
+
+    // Populate element (original or clone)
+    element.querySelector("#pdf-val-unit").textContent = data.unit || "";
+    element.querySelector("#pdf-val-mekala").textContent = data.mekala || "";
+    element.querySelector("#pdf-val-fullName").textContent = data.fullName || "";
+    
+    // Address splitting into two lines
+    const addr = data.address || "";
+    let addr1 = addr;
+    let addr2 = "";
+    if (addr.length > 40) {
+      const splitIdx = addr.lastIndexOf(',', 40) !== -1 ? addr.lastIndexOf(',', 40) + 1 : addr.indexOf(' ', 35);
+      if (splitIdx > 0) {
+        addr1 = addr.slice(0, splitIdx).trim();
+        addr2 = addr.slice(splitIdx).trim();
+      } else {
+        addr1 = addr.slice(0, 40);
+        addr2 = addr.slice(40);
+      }
+    }
+    element.querySelector("#pdf-val-address1").textContent = addr1;
+    element.querySelector("#pdf-val-address2").textContent = addr2;
+    
+    element.querySelector("#pdf-val-pin").textContent = data.pin || "";
+    element.querySelector("#pdf-val-phone").textContent = data.phone || "";
+    element.querySelector("#pdf-val-email").textContent = data.email || "";
+    element.querySelector("#pdf-val-fatherName").textContent = data.fatherName || "";
+    element.querySelector("#pdf-val-dob").textContent = formatDate(data.dob);
+
+    // Populate Custom Checkboxes with checkmark
+    element.querySelector("#pdf-gender-male-box").textContent = data.gender === "Male" ? "✓" : "";
+    element.querySelector("#pdf-gender-female-box").textContent = data.gender === "Female" ? "✓" : "";
+    element.querySelector("#pdf-gender-others-box").textContent = data.gender === "Others" ? "✓" : "";
+    
+    element.querySelector("#pdf-marital-married-box").textContent = data.maritalStatus === "Married" ? "✓" : "";
+    element.querySelector("#pdf-marital-unmarried-box").textContent = data.maritalStatus === "Unmarried" ? "✓" : "";
+
+    element.querySelector("#pdf-val-education").textContent = data.education || "";
+    element.querySelector("#pdf-val-occupation").textContent = data.occupation || "";
+    
+    element.querySelector("#pdf-val-pledgeName").textContent = data.fullName || "";
+    element.querySelector("#pdf-val-sigName").textContent = data.fullName || "";
+    
+    const sigDate = data.timestamp ? data.timestamp.split(',')[0] : new Date().toLocaleDateString("en-IN");
+    element.querySelector("#pdf-val-sigDate").textContent = sigDate;
+
+    const pdfPhoto = element.querySelector("#pdf-photo");
+    const pdfPhotoPlaceholder = element.querySelector("#pdf-photo-placeholder");
+    if (data.photo) {
+      pdfPhoto.src = data.photo;
+      pdfPhoto.style.display = "block";
+      pdfPhotoPlaceholder.style.display = "none";
+    } else {
+      pdfPhoto.src = "";
+      pdfPhoto.style.display = "none";
+      pdfPhotoPlaceholder.style.display = "block";
+    }
+
+    if (shouldSave) {
+      const filename = "KCYM_Reg_" + data.fullName.trim().replace(/\s+/g, "_") + ".pdf";
+
+      // Fallback for file:// protocol due to browser security policies blocking SVG export
+      if (window.location.protocol === 'file:') {
+        if (isClone && container) {
+          container.style.width = "794px";
+          container.style.height = "1123px";
+          container.style.overflow = "visible";
+          container.style.opacity = "1";
+          container.style.zIndex = "99999";
+        }
+        setTimeout(() => {
+          window.print();
+          if (isClone && container) document.body.removeChild(container);
+        }, 150);
+        return;
+      }
+
+      const opt = {
+        margin:       0,
+        filename:     filename,
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2, useCORS: true, logging: false, scrollX: 0, scrollY: 0, windowWidth: 794, windowHeight: 1123 },
+        jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+      };
+
+      // Force browser reflow to compute sizes and dimensions of the cloned element
+      if (isClone) {
+        element.getBoundingClientRect();
+      }
+
+      // Delay execution slightly to ensure styles and layouts are fully computed by the browser engine
+      setTimeout(() => {
+        htmlToImage.toPng(element, { quality: 1.0, pixelRatio: 2 })
+          .then((dataUrl) => {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({
+              orientation: 'portrait',
+              unit: 'mm',
+              format: 'a4'
+            });
+            pdf.addImage(dataUrl, 'PNG', 0, 0, 210, 297);
+            pdf.save(filename);
+            if (isClone && container) document.body.removeChild(container);
+          })
+          .catch((err) => {
+            console.error("PDF generation failed", err);
+            if (isClone && container) document.body.removeChild(container);
+          });
+      }, 250);
+    }
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return "";
+    try {
+      const [year, month, day] = dateStr.split('-');
+      return `${day}/${month}/${year}`;
+    } catch(e) {
+      return dateStr;
+    }
+  }
+
+  // ----------------------------------------------------
+  // ADMIN & DASHBOARD LOGIC
+  // ----------------------------------------------------
+  function promptAdminLogin() {
+    document.getElementById("adminPass").value = "";
+    document.getElementById("err-adminPass").style.display = "none";
+    document.getElementById("adminLoginModal").style.display = "flex";
+    document.getElementById("adminPass").focus();
+  }
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      closeAdminModal('adminLoginModal');
+      closeAdminModal('memberDetailsModal');
+    }
+  });
+
+  function closeAdminModal(modalId) {
+    document.getElementById(modalId).style.display = "none";
+  }
+
+  function submitAdminLogin() {
+    const pass = document.getElementById("adminPass").value;
+    if (pass === "2007") {
+      closeAdminModal("adminLoginModal");
+      enterAdminDashboard();
+    } else {
+      document.getElementById("err-adminPass").style.display = "block";
+    }
+  }
+
+  async function enterAdminDashboard() {
+    document.getElementById("registrationSection").style.display = "none";
+    document.getElementById("successCard").style.display = "none";
+    document.getElementById("welcomeBanner").style.display = "none";
+    document.getElementById("adminDashboard").style.display = "block";
+    
+    // Show a loading state in the table body
+    const tbody = document.getElementById("adminTableBody");
+    if (tbody) {
+      tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px;"><div class="spinner" style="display:inline-block; border-color:var(--primary); border-top-color:transparent; width:30px; height:30px;"></div><p style="margin-top:10px; color:var(--text-muted);">Loading member database from Google Sheets...</p></td></tr>`;
+    }
+    document.getElementById("noDataMsg").style.display = "none";
+    
+    // Reset stats to loading state
+    document.getElementById("stat-total").textContent = "...";
+    document.getElementById("stat-male").textContent = "...";
+    document.getElementById("stat-female").textContent = "...";
+    document.getElementById("stat-blood").textContent = "...";
+
+    // Fetch latest data from Google Sheets
+    await fetchRegistrations();
+    
+    renderAdminTable();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function exitAdmin() {
+    document.getElementById("adminDashboard").style.display = "none";
+    document.getElementById("registrationSection").style.display = "block";
+    document.getElementById("welcomeBanner").style.display = "block";
+  }
+
+  function getRegistrations() {
+    return cachedRegistrations;
+  }
+
+  function renderAdminTable() {
+    const regs = getRegistrations();
+    
+    document.getElementById("stat-total").textContent = regs.length;
+    
+    const males = regs.filter(r => r.gender === 'Male').length;
+    document.getElementById("stat-male").textContent = males;
+    
+    const females = regs.filter(r => r.gender === 'Female').length;
+    document.getElementById("stat-female").textContent = females;
+    
+    const knownBlood = regs.filter(r => r.bloodGroup !== 'Unknown' && r.bloodGroup !== '').length;
+    document.getElementById("stat-blood").textContent = knownBlood;
+
+    const tbody = document.getElementById("adminTableBody");
+    tbody.innerHTML = "";
+
+    if (regs.length === 0) {
+      document.getElementById("noDataMsg").style.display = "block";
+      return;
+    } else {
+      document.getElementById("noDataMsg").style.display = "none";
+    }
+
+    regs.forEach((reg, index) => {
+      const tr = document.createElement("tr");
+      tr.className = "admin-table-row";
+
+      const photoCell = document.createElement("td");
+      if (reg.photo) {
+        const img = document.createElement("img");
+        img.src = reg.photo;
+        img.className = "table-thumbnail";
+        photoCell.appendChild(img);
+      } else {
+        const placeholder = document.createElement("div");
+        placeholder.className = "table-avatar-placeholder";
+        placeholder.textContent = "👤";
+        photoCell.appendChild(placeholder);
+      }
+      tr.appendChild(photoCell);
+
+      const nameCell = document.createElement("td");
+      nameCell.style.fontWeight = "600";
+      nameCell.textContent = reg.fullName;
+      tr.appendChild(nameCell);
+
+      const phoneCell = document.createElement("td");
+      phoneCell.textContent = reg.phone;
+      tr.appendChild(phoneCell);
+
+      const bloodCell = document.createElement("td");
+      bloodCell.innerHTML = `<span style="display:inline-block; padding: 2px 8px; border-radius:4px; font-weight:700; background:rgba(200,16,46,0.1); color:var(--primary);">${reg.bloodGroup}</span>`;
+      tr.appendChild(bloodCell);
+
+      const ageCell = document.createElement("td");
+      ageCell.textContent = reg.age || "-";
+      tr.appendChild(ageCell);
+
+      const occCell = document.createElement("td");
+      occCell.textContent = reg.occupation || "-";
+      tr.appendChild(occCell);
+
+      const actionsCell = document.createElement("td");
+      actionsCell.className = "actions-cell";
+      
+      const viewBtn = document.createElement("button");
+      viewBtn.className = "btn-action-view";
+      viewBtn.textContent = "View";
+      viewBtn.onclick = () => viewMemberDetails(index);
+      actionsCell.appendChild(viewBtn);
+
+      const deleteBtn = document.createElement("button");
+      deleteBtn.className = "btn-action-delete";
+      deleteBtn.textContent = "Delete";
+      deleteBtn.onclick = () => deleteRegistration(index);
+      actionsCell.appendChild(deleteBtn);
+
+      tr.appendChild(actionsCell);
+      tbody.appendChild(tr);
+    });
+  }
+
+  function filterAdminTable() {
+    const searchVal = document.getElementById("adminSearch").value.toLowerCase();
+    const bloodVal = document.getElementById("adminFilterBlood").value;
+    const occVal = document.getElementById("adminFilterOcc").value;
+
+    const rows = document.querySelectorAll(".admin-table-row");
+    let matchCount = 0;
+
+    rows.forEach((row, idx) => {
+      const regs = getRegistrations();
+      const reg = regs[idx];
+      if (!reg) return;
+
+      const nameMatch = reg.fullName.toLowerCase().includes(searchVal) || 
+                        reg.phone.includes(searchVal) || 
+                        reg.unit.toLowerCase().includes(searchVal);
+      const bloodMatch = bloodVal === "" || reg.bloodGroup === bloodVal;
+      
+      let occMatch = true;
+      if (occVal !== "") {
+        if (occVal === "Employed") {
+          occMatch = reg.occupation.includes("Employed");
+        } else if (occVal === "Unemployed / Other") {
+          occMatch = reg.occupation === "Unemployed" || reg.occupation === "Other" || reg.occupation === "Homemaker";
+        } else {
+          occMatch = reg.occupation === occVal;
+        }
+      }
+
+      if (nameMatch && bloodMatch && occMatch) {
+        row.style.display = "";
+        matchCount++;
+      } else {
+        row.style.display = "none";
+      }
+    });
+
+    const noData = document.getElementById("noDataMsg");
+    noData.style.display = matchCount === 0 ? "block" : "none";
+  }
+
+  function viewMemberDetails(index) {
+    const regs = getRegistrations();
+    const reg = regs[index];
+    if (!reg) return;
+
+    document.getElementById("detailsModalTitle").textContent = reg.fullName;
+    
+    const photo = document.getElementById("detailsPhoto");
+    if (reg.photo) {
+      photo.src = reg.photo;
+      photo.style.display = "block";
+    } else {
+      photo.src = "";
+      photo.style.display = "none";
+    }
+
+    const grid = document.getElementById("detailsGrid");
+    grid.innerHTML = `
+      <div class="modal-grid-label">Unit / Mekala</div>
+      <div class="modal-grid-val">${reg.unit} / ${reg.mekala}</div>
+      <div class="modal-grid-label">Address</div>
+      <div class="modal-grid-val">${reg.address}, PIN: ${reg.pin}</div>
+      <div class="modal-grid-label">Contact</div>
+      <div class="modal-grid-val">${reg.phone}<br><span style="font-size:12px; color:var(--text-muted);">${reg.email}</span></div>
+      <div class="modal-grid-label">Father's Name</div>
+      <div class="modal-grid-val">${reg.fatherName}</div>
+      <div class="modal-grid-label">DOB / Age</div>
+      <div class="modal-grid-val">${formatDate(reg.dob)} (Age ${reg.age || "-"})</div>
+      <div class="modal-grid-label">Gender / Status</div>
+      <div class="modal-grid-val">${reg.gender} / ${reg.maritalStatus}</div>
+      <div class="modal-grid-label">Blood Group</div>
+      <div class="modal-grid-val"><strong style="color:var(--primary);">${reg.bloodGroup}</strong></div>
+      <div class="modal-grid-label">Qual. / Job</div>
+      <div class="modal-grid-val">${reg.education} · ${reg.occupation}</div>
+    `;
+
+    const dlBtn = document.getElementById("detailsDownloadBtn");
+    dlBtn.onclick = () => generatePDF(reg);
+
+    document.getElementById("memberDetailsModal").style.display = "flex";
+  }
+
+  async function deleteRegistration(index) {
+    const regs = getRegistrations();
+    const reg = regs[index];
+    if (!reg) return;
+
+    if (confirm(`Are you sure you want to delete ${reg.fullName || "this member"}'s registration? This action cannot be undone.`)) {
+      // Show loading status inside the table
+      const tbody = document.getElementById("adminTableBody");
+      if (tbody) {
+        tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 40px;"><div class="spinner" style="display:inline-block; border-color:var(--primary); border-top-color:transparent; width:30px; height:30px;"></div><p style="margin-top:10px; color:var(--text-muted);">Deleting member from Google Sheets...</p></td></tr>`;
+      }
+      
+      try {
+        updateSyncStatus('syncing');
+        const deleteUrl = `${SCRIPT_URL}?action=delete&id=${encodeURIComponent(reg.id || "")}&phone=${encodeURIComponent(reg.phone || "")}`;
+        const response = await fetch(deleteUrl, { method: "GET", mode: "cors" });
+        if (!response.ok) throw new Error("Delete request failed");
+        const resJson = await response.json();
+        if (resJson && resJson.status === "error") throw new Error(resJson.message);
+        
+        // Remove from local cache array
+        cachedRegistrations.splice(index, 1);
+        // Sync cache fallback to local storage
+        localStorage.setItem('kcym_registrations', JSON.stringify(cachedRegistrations));
+        
+        // Update connection status
+        if (pendingSync.length === 0) {
+          updateSyncStatus('connected');
+        } else {
+          updateSyncStatus('offline');
+        }
+      } catch (error) {
+        console.error("Error deleting registration:", error);
+        updateSyncStatus('offline');
+        alert("Failed to delete registration on Google Sheets. Please check your internet connection.");
+      }
+      
+      renderAdminTable();
+    }
+  }
+
+  function exportToCSV() {
+    const regs = getRegistrations();
+    if (regs.length === 0) {
+      alert("No registration data available to export.");
+      return;
+    }
+
+    const headers = ["ID", "Timestamp", "Unit", "Mekala", "Full Name", "Address", "PIN", "Phone", "Email", "Father's Name", "DOB", "Age", "Gender", "Marital Status", "Blood Group", "Education", "Occupation"];
+    const rows = regs.map(r => [
+      r.id || "",
+      r.timestamp || "",
+      `"${(r.unit || "").replace(/"/g, '""')}"`,
+      `"${(r.mekala || "").replace(/"/g, '""')}"`,
+      `"${(r.fullName || "").replace(/"/g, '""')}"`,
+      `"${(r.address || "").replace(/"/g, '""')}"`,
+      r.pin || "",
+      r.phone || "",
+      r.email || "",
+      `"${(r.fatherName || "").replace(/"/g, '""')}"`,
+      r.dob || "",
+      r.age || "",
+      r.gender || "",
+      r.maritalStatus || "",
+      r.bloodGroup || "",
+      `"${(r.education || "").replace(/"/g, '""')}"`,
+      r.occupation || ""
+    ]);
+
+    const csvContent = [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", `KCYM_Pakkil_Registrations_${new Date().toLocaleDateString("en-IN").replace(/\//g, "_")}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  }
+
+  function insertMockData() {
+    const mockData = [
+      {
+        id: "REG-094821",
+        timestamp: new Date().toLocaleString("en-IN"),
+        unit: "Pakkil Unit",
+        mekala: "Kottayam",
+        fullName: "Albin Joseph",
+        address: "Thoppil House, Pakkil P.O., Kottayam",
+        pin: "686012",
+        phone: "9876543210",
+        email: "albin@gmail.com",
+        fatherName: "Joseph T. J.",
+        dob: "2002-05-14",
+        age: "24",
+        gender: "Male",
+        maritalStatus: "Unmarried",
+        bloodGroup: "O+",
+        education: "B.Tech Computer Science",
+        occupation: "Employed – Private",
+        photo: ""
+      },
+      {
+        id: "REG-123490",
+        timestamp: new Date().toLocaleString("en-IN"),
+        unit: "Pakkil Unit",
+        mekala: "Kottayam",
+        fullName: "Anjali Maria",
+        address: "Kalarickal, Nattakom P.O., Kottayam",
+        pin: "686013",
+        phone: "8765432109",
+        email: "anjali.maria@yahoo.com",
+        fatherName: "George K. M.",
+        dob: "2004-10-22",
+        age: "21",
+        gender: "Female",
+        maritalStatus: "Unmarried",
+        bloodGroup: "A+",
+        education: "B.Sc Physics",
+        occupation: "College Student",
+        photo: ""
+      },
+      {
+        id: "REG-874294",
+        timestamp: new Date().toLocaleString("en-IN"),
+        unit: "Pakkil Unit",
+        mekala: "Kottayam",
+        fullName: "Jerin K. Tom",
+        address: "Kunnumpurath, Pakkil, Kottayam",
+        pin: "686012",
+        phone: "7654321098",
+        email: "jerintom@outlook.com",
+        fatherName: "Tom K. V.",
+        dob: "1998-02-03",
+        age: "28",
+        gender: "Male",
+        maritalStatus: "Married",
+        bloodGroup: "B+",
+        education: "MBA Finance",
+        occupation: "Self-Employed / Business",
+        photo: ""
+      }
+    ];
+
+    localStorage.setItem('kcym_registrations', JSON.stringify(mockData));
+    renderAdminTable();
+  }
+</script>
+</body>
+</html>
